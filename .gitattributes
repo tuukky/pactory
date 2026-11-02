@@ -1,0 +1,5 @@
+# v4 frozen_manifest.json은 파일 바이트를 sha256으로 검증하므로 줄바꿈 변환을 끈다
+src/vision_guide/** -text
+configs/v3/** -text
+configs/v4/** -text
+requirements_v4.txt -text

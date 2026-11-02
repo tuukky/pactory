@@ -1,0 +1,62 @@
+# 자세 추정 파이프라인 임계값. 개발 세트(합성 간이 장면, LM-O dev)에서만 정하고 4주차에 동결한다.
+# 바꾼 값은 docs/v3/verification.md "임계값 조정 기록"에 무엇을 왜 바꿨는지 남긴다.
+schema_version: 1
+frozen: false
+units: {length: m}
+seed: 0
+roi:
+  z_min_m: 0.2           # 카메라 좌표 깊이 범위
+  z_max_m: 2.0
+preprocess:
+  voxel_m: 0.004
+  outlier_nb: 20         # statistical outlier: 이웃 수
+  outlier_std: 2.0       # 표준편차 배수
+  normal_radius_m: 0.012
+  normal_max_nn: 30
+plane:
+  enabled: true
+  distance_m: 0.006
+  ransac_n: 3
+  iterations: 1000
+  min_inlier_frac: 0.15  # 가장 큰 평면이 입력 점의 이 비율 이상일 때만 제거
+cluster:
+  eps_m: 0.010
+  min_points: 10         # DBSCAN core 이웃 수
+  min_cluster_points: 30
+  min_extent_frac: 0.25  # 클러스터 bbox 대각 / 모델 직경 하한
+  max_extent_frac: 1.6   # 상한 (붙은 물체 덩어리 제거)
+  max_candidates: 10     # 위쪽(카메라에 가까운)부터 최대 후보 수
+model:
+  n_points: 6000         # 표면 샘플 수 (voxel 전)
+fpfh:
+  radius_factor: 5.0     # × voxel
+  max_nn: 100
+ransac:
+  distance_factor: 1.5   # × voxel
+  ransac_n: 3
+  edge_length: 0.9
+  max_iteration: 100000
+  confidence: 0.999
+  mutual_filter: false
+  n_restarts: 5          # 서로 다른 시드로 반복, fitness × 가시비율 최고 채택 (1→5: 간이 장면 dev 조정, verification.md)
+  min_points: 30         # 클러스터 점이 이보다 적으면 FEATURE_FAIL
+icp:
+  coarse_max_corr_m: 0.015
+  coarse_max_iter: 30
+  fine_max_corr_m: 0.006
+  fine_max_iter: 50
+confidence:
+  min_fitness: 0.6       # 클러스터 점 중 모델과 fine_max_corr 안에서 대응되는 비율
+  max_rmse_m: 0.004
+  min_visible_ratio: 0.5 # 추정 자세의 보이는 모델 픽셀 중 관측 depth와 vis_tol 안인 비율
+  vis_tol_m: 0.010
+symmetry:
+  max_sym_disc_step: 0.01  # BOP 연속 대칭 이산화 (직경 대비)
+# 데이터셋(센서)별 덮어쓰기. 기본값 위에 깊은 병합한다. LM-O dev에서만 정했다 (verification.md 조정 기록).
+profiles:
+  lmo:
+    plane:
+      distance_m: 0.015      # Kinect 테이블 depth가 6 mm 띠보다 두꺼워 평면이 둘로 갈라짐 → 15 mm
+      min_inlier_frac: 0.10  # 일부 프레임에서 테이블 비율 0.13~0.15 → 제거 안 되던 문제
+    cluster:
+      max_candidates: 20     # 대상 클러스터가 가까운 순 10위 밖인 경우가 많음

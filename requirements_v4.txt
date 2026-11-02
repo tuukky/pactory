@@ -1,0 +1,54 @@
+# v4 의존성 (2026-10-30 설치 기준 고정)
+#
+# [n8n] (CPU 파이프라인, v3와 같음): 신규 패키지 없음 → requirements_v3.txt 그대로.
+#   색 처리는 기존 opencv-python==4.12.0.88 사용. n8n env의 torch는 변경하지 않았다.
+#
+# [pactory-seg] (conda env, python 3.12; 세그멘테이션 학습·추론, BlenderProc 합성 렌더링)
+#   torch: pip install torch==2.8.0 torchvision==0.23.0 --index-url https://download.pytorch.org/whl/cu126
+#   확인: torch.cuda.is_available()=True, capability (6,1) GTX 1060 6GB, get_arch_list=[sm_61, sm_70, sm_75, sm_80, sm_86, sm_90]
+#   드라이버 560.94 (CUDA 12.6까지). cu128 이상 불가.
+#   Blender: blenderproc 첫 실행이 C:\stockauto\tools\blender\blender-4.2.1-windows-x64 에 설치 (Blender 4.2.1 LTS, 내장 Python 3.11.7)
+#   라이선스: ultralytics(코드·가중치) AGPL-3.0, blenderproc GPL-3.0, Blender GPL.
+# 아래는 pactory-seg의 pip freeze 전체.
+blenderproc==2.8.0
+certifi==2026.10.23
+charset-normalizer==3.5.2
+contourpy==1.4.0
+cycler==0.12.1
+filelock==4.2.4
+fonttools==4.68.0
+fsspec==2026.9.0
+h5py==3.16.0
+idna==3.20
+ImageIO==2.38.1
+Jinja2==3.1.6
+kiwisolver==1.5.1
+MarkupSafe==3.0.3
+matplotlib==3.11.2
+mpmath==1.3.0
+networkx==3.7
+numpy==2.5.4
+opencv-python==5.0.0.93
+packaging==26.3
+pillow==13.0.0
+polars==2.1.0
+polars-runtime-32==2.1.0
+progressbar==2.5
+psutil==7.2.2
+pyparsing==3.3.3
+python-dateutil==3.0.0
+PyYAML==6.0.3
+requests==2.34.2
+scipy==1.18.1
+setuptools==84.0.0
+six==1.17.0
+sympy==1.14.0
+torch==2.8.0+cu126
+torchvision==0.23.0+cu126
+trimesh==5.2.0
+typing_extensions==4.16.0
+tzdata==2026.6
+ultralytics==8.3.253
+ultralytics-thop==2.2.3
+urllib3==2.8.0
+wheel==0.48.0

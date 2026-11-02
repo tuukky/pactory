@@ -1,0 +1,70 @@
+# v4.0 기준선 동결본 (freeze-baseline이 생성, 손으로 고치지 않는다).
+# = configs/v3/pipeline.yaml 기본값 + profiles.lmo. v4 기능 플래그는 모두 꺼짐.
+# frozen: true 는 v4 동결 표시 (v3 pipeline.yaml의 frozen 키를 덮는다; 계산에는 쓰이지 않는다).
+schema_version: 1
+frozen: true
+units:
+  length: m
+seed: 0
+roi:
+  z_min_m: 0.2
+  z_max_m: 2.0
+preprocess:
+  voxel_m: 0.004
+  outlier_nb: 20
+  outlier_std: 2.0
+  normal_radius_m: 0.012
+  normal_max_nn: 30
+plane:
+  enabled: true
+  distance_m: 0.015
+  ransac_n: 3
+  iterations: 1000
+  min_inlier_frac: 0.1
+cluster:
+  eps_m: 0.01
+  min_points: 10
+  min_cluster_points: 30
+  min_extent_frac: 0.25
+  max_extent_frac: 1.6
+  max_candidates: 20
+model:
+  n_points: 6000
+fpfh:
+  radius_factor: 5.0
+  max_nn: 100
+ransac:
+  distance_factor: 1.5
+  ransac_n: 3
+  edge_length: 0.9
+  max_iteration: 100000
+  confidence: 0.999
+  mutual_filter: false
+  n_restarts: 5
+  min_points: 30
+icp:
+  coarse_max_corr_m: 0.015
+  coarse_max_iter: 30
+  fine_max_corr_m: 0.006
+  fine_max_iter: 50
+confidence:
+  min_fitness: 0.6
+  max_rmse_m: 0.004
+  min_visible_ratio: 0.5
+  vis_tol_m: 0.01
+symmetry:
+  max_sym_disc_step: 0.01
+profile: lmo
+version: baseline
+source:
+  from: configs/v3/pipeline.yaml (+ profiles.lmo)
+  sha256_16: 1e97f72688486c7d
+color:
+  enabled: false
+checks:
+  enabled: false
+seg:
+  source: dbscan
+runtime:
+  omp_num_threads: 16
+  cv2_threads: 1

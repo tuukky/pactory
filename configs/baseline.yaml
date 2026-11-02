@@ -1,0 +1,66 @@
+# 3품종 생산라인 기준안(B0) 설정.
+# 모든 수치는 합성 실험 가정이며 실측값이 아니다. 시간 단위: 초.
+schema_version: 1
+model_name: three_product_line
+time_unit: s
+
+orders:
+  counts: {P1: 240, P2: 144, P3: 96}
+  order_ready_at_s: 0
+  due_s: 28800
+
+release:
+  min_interval_s: 48
+  wip_limit: 40            # null = 무제한
+  sequence:
+    policy: random_permutation   # 또는 {policy: grouped, order: [P1, P2, P3]}
+
+run:
+  observation_window_s: [0, 28800]
+  time_limit_s: 57600
+
+stochastic:
+  enabled: true            # false = 표의 고정시간(검증 모드)
+  distribution: lognormal
+  cv: 0.10
+
+products:
+  P1: {fail_rate: 0.02, recover_prob: 0.85}
+  P2: {fail_rate: 0.04, recover_prob: 0.85}
+  P3: {fail_rate: 0.06, recover_prob: 0.85}
+
+line:
+  first_station: PREP
+  stations:
+    PREP:
+      machines: 1
+      input_buffer: {id: Q_PREP, capacity: 8}
+      times_s: {P1: 30, P2: 35, P3: 40}
+      route: {next: ASM}
+    ASM:
+      machines: 2
+      input_buffer: {id: Q_ASM, capacity: 8}
+      times_s: {P1: 70, P2: 85, P3: 110}
+      setup_matrix_s:
+        P1: {P1: 0, P2: 20, P3: 40}
+        P2: {P1: 20, P2: 0, P3: 30}
+        P3: {P1: 40, P2: 30, P3: 0}
+      route: {next: TEST}
+    TEST:
+      machines: 1
+      input_buffer: {id: Q_TEST, capacity: 8}
+      times_s: {P1: 50, P2: 65, P3: 90}
+      route: {type: inspect, on_pass: PACK, on_fail: REWORK}
+    REWORK:
+      machines: 1
+      input_buffer: {id: Q_REWORK, capacity: 4}
+      times_s: {P1: 90, P2: 120, P3: 150}
+      route: {type: rework, on_pass: PACK, on_fail: SCRAP}
+    PACK:
+      machines: 1
+      input_buffer: {id: Q_PACK, capacity: 8}
+      times_s: {P1: 20, P2: 25, P3: 30}
+      route: {next: SHIP}
+
+# 스테이션별 가공시간 배율(준비시간 제외). 예: {ASM: 0.8}
+time_scale: {}

@@ -1,0 +1,43 @@
+{
+ "schema_version": 1,
+ "created_utc": "2026-10-31T07:47:32.510068+00:00",
+ "configs": {
+  "baseline": "configs/v4/lmo_baseline.yaml",
+  "v41": "configs/v4/lmo_v41.yaml",
+  "v42": "configs/v4/lmo_v42.yaml"
+ },
+ "weights": "results/v4/seg-train_n/weights/best.pt",
+ "weights_sha256": "a1ca23be7349a026181fc59008fb03776be11335499cb3e58a10f9feca91d736",
+ "code_sha256": "775a41646117ffe60bdedb566748d2efd0fa871cad160e631d7e824c941c26f1",
+ "files": {
+  "configs/v4/lmo_baseline.yaml": "6491c39d3db321b8f7f12744d98af4b36dd77071893448fd698f9cdbf4335406",
+  "configs/v4/lmo_v41.yaml": "f1e4a9a0dc39307ffef4de6a3ed6733a9269034e2b25fb0bbb1f3e5564bf8dae",
+  "configs/v4/lmo_v42.yaml": "6a78e05b928ed2bd238efe653734c19dbbcddd5a7a0ce9bbd6fec0a09f2fa1f6",
+  "configs/v3/dataset.yaml": "bff4204d419a47bd63555f9c97f02ddc84798c03c29978c968436955d45ca5c7",
+  "configs/v3/pipeline.yaml": "1e97f72688486c7de1f552bdd53e310c825aa0190cef9c7c80bb392373de2ca5",
+  "configs/v4/train_synth.yaml": "d0ea7ec31bc3e5104890ed035f917366de40a4c4d4bb93765a9053a640751a77",
+  "configs/v4/train_seg.yaml": "804ac19ffaf3c73ce27e638606f6eda8483088817eac56fda5dc07c9da80f1fd",
+  "requirements_v4.txt": "f194c76a26a218aa6a4b6e15317257229aa63b0f57fa91dfca80ad5336935d7d",
+  "results/v4/seg-train_n/weights/best.pt": "a1ca23be7349a026181fc59008fb03776be11335499cb3e58a10f9feca91d736",
+  "src/vision_guide/__init__.py": "0e8837dfcc39dadcb2625e1a2e97310ff38d21a4da1c2c81685703e85ba27a04",
+  "src/vision_guide/bproc_scene.py": "d46d32c4a3060ada70321438febfc8976ad68aade372aaa7cb5ff6a30ac5f53b",
+  "src/vision_guide/cad.py": "41295a4a88cccb826954f8c24834c4dcb2fb4d2bb14eb0281ec5cbb6c5672ea1",
+  "src/vision_guide/calib.py": "955ec9a9225171a577327fa3111f4d0422fd64cf6fef67ed65bf24c187ddf9fd",
+  "src/vision_guide/color.py": "924876f572af37b5d5e4502156f8e7394531ba4de74632be20d8a88dee1efad2",
+  "src/vision_guide/consistency.py": "5cf2549f0fc3b755b6f0e9b4987969b34835cc39e8ca5646a9de9d341c0197d7",
+  "src/vision_guide/datasets.py": "4dcdcdd183d0136499d5677de7726a2129875a2816c66e39430041d73750b7d0",
+  "src/vision_guide/failures.py": "f74caa6de2d5a83b2160733baf46e064f0dc1a6dd57a7b2a5b4c0be9d0864877",
+  "src/vision_guide/geometry.py": "f79b35b304d86a6e42b3a1eb778f9079706928f04a6f7d0e485a5744bb463c13",
+  "src/vision_guide/guidance.py": "ffe57e7b6cdad107bb88a3c598491d358c81318c12fa30b042879596682bbd60",
+  "src/vision_guide/metrics.py": "81dd246c1fe88f7a3a61449bd6f09b7fbc10a7ee6eceef1713efc073ff7e2497",
+  "src/vision_guide/pipeline_v4.py": "41d5346d804b06a79c59c9f4b05d8db98f89fc3b972a9051ba14e9ba4bb56ccb",
+  "src/vision_guide/pose.py": "8551a1ee247ecb8486a9aa7e5b6fd243a64942d01bf8aa805b4633a8b8a8b343",
+  "src/vision_guide/run.py": "4ec660bfbf0f4b475717fbaa1945c3b04f7ddfc6b22fe2e1f0484e4a962bb375",
+  "src/vision_guide/run_v4.py": "ff88c8c515800e0dada57b251d09a4ece72efa1caddc528dfc2c4d25d4205022",
+  "src/vision_guide/seg_model.py": "02437b5a70ec5b99e2dd73ee34efc4c9f7f9527cc0c60784eebb9913bb44fbaa",
+  "src/vision_guide/segment.py": "c797ed7fb4b127074515a973146817190da082830daa317dbe2ad138978b1d74",
+  "src/vision_guide/stats.py": "5e95a0d705ad77c06b55a6a9e7ba7629d07ffee8ab5db921fe5db6b920226fd5",
+  "src/vision_guide/synth.py": "0775f46c9f6d7e85aaaa9e9731789060089393e8fe4dc808fe5c51195efa2b18"
+ },
+ "combined_sha256": "8afef09ef18053cef9d5d273d6f399c4d369fdc4e6568f8854b3c7da9b9baccf"
+}

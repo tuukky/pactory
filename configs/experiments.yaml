@@ -1,0 +1,28 @@
+# 실험 매트릭스 (§11). 경로는 이 파일 기준 상대경로.
+experiment_name: bottleneck_study
+base_config: baseline.yaml
+baseline_scenario: B0
+
+scenarios:
+  B0: {description: 기준안, overrides: {}, physical_delta: "없음"}
+  S1: {description: "TEST 1→2대", overrides: {line.stations.TEST.machines: 2}, physical_delta: "TEST 설비 +1대"}
+  S2: {description: "Q_TEST 8→16", overrides: {line.stations.TEST.input_buffer.capacity: 16}, physical_delta: "Q_TEST 대기 슬롯 +8"}
+  S3: {description: "ASM 처리시간 ×0.8", overrides: {time_scale.ASM: 0.8}, physical_delta: "ASM 가공시간 20% 단축(준비시간 동일)"}
+  S4: {description: "PREP 처리시간 ×0.8", overrides: {time_scale.PREP: 0.8}, physical_delta: "PREP 가공시간 20% 단축"}
+  S5: {description: "P1→P2→P3 묶음 투입", overrides: {release.sequence: {policy: grouped, order: [P1, P2, P3]}}, physical_delta: "없음(운영 정책)"}
+
+# 탐색(discovery) 결과를 본 뒤 최대 2개만 정의한다. 선택 근거(rationale) 필수.
+# 예: C1: {components: [S1, S3], rationale: "..."}
+combinations: {}
+
+conditions:
+  base: {description: "기본 50/30/20, CV 0.10", overrides: {}}
+  high_load_mix: {description: "30/30/40", overrides: {orders.counts: {P1: 144, P2: 144, P3: 192}}, comparable_to_base: false}
+  high_cv: {description: "CV 0.25", overrides: {stochastic.cv: 0.25}}
+
+phases:
+  discovery: {seeds: {start: 100, count: 20}, scenarios: [B0, S1, S2, S3, S4, S5], conditions: [base]}
+  confirmation: {seeds: {start: 1000, count: 30}, scenarios: [B0, CANDIDATE], conditions: [base, high_load_mix, high_cv]}
+
+# 탐색 후 동결할 최종 후보 1개 (예: S1 또는 C1). null이면 confirmation 실행 거부.
+confirmation_candidate: null

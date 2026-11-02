@@ -1,0 +1,99 @@
+# v4.2-A 합성 학습 데이터 생성 조건 (PLAN_v4 §5.1, 구현계획 §5). **첫 생성(파일럿 포함) 전에 기록, 이후 고치지 않는다.**
+# 작성 2026-10-30. 바꿔야 하면 아래 change_log에 사유와 함께 남기고, 이미 만든 데이터는 다시 만든다.
+# 데이터 표기: 합성 (BlenderProc 렌더링). LM-O test 영상(dev·eval)은 쓰지 않는다 — 물체 CAD 모델(정점 색)과 무작위 장면만.
+schema_version: 1
+label: "합성: BlenderProc 렌더링 (LM-O·LM CAD 모델만, 실측 영상 미사용)"
+frozen_before_generation: true
+
+tools:
+  blenderproc: "2.8.0"
+  blender_install_path: 'C:\stockauto\tools\blender'        # blenderproc run --blender-install-path (4.2.1 LTS 설치됨)
+  blenderproc_exe: 'C:\Users\CEO\anaconda3\envs\pactory-seg\Scripts\blenderproc.exe'
+  scenes_per_process: 10                                    # 프로세스당 장면 수 (장면 단위 재개)
+
+objects:
+  targets:                     # 클래스·정답에 포함 (YOLO 클래스 0..7 = 아래 순서)
+    root: data/v3/bop/lmo/models   # 정점 색 PLY (mm). LM-O 대상 8종
+    obj_ids: [1, 5, 6, 8, 9, 10, 11, 12]
+    p_present: 0.8             # 장면마다 각 물체 등장 확률 (독립). 0개면 무작위 1개 강제
+  distractors:                 # 방해물: 정답·클래스에 넣지 않음 (배경으로 취급)
+    root: data/v4/bop/lm/models    # LM 나머지 7종 (CC BY 4.0). 모델 정보만 사용 (test 영상 누설 아님)
+    obj_ids: [2, 3, 4, 7, 13, 14, 15]
+    n_range: [3, 6]            # 장면당 개수 (중복 없이)
+  unit_scale: 0.001            # mm → m (set_scale + persist)
+  material:
+    roughness: [0.3, 0.9]      # 균등
+    specular_ior_level: [0.1, 0.6]
+  drop:                        # 물리 낙하 초기 위치 (바닥 좌표, m)
+    xy_half: 0.25
+    z_range: [0.05, 0.35]
+  physics:
+    collision_shape: CONVEX_HULL
+    min_simulation_time: 1.0
+    max_simulation_time: 4.0
+    check_object_interval: 1.0
+
+scene:
+  floor_half_m: 1.5            # 바닥 3 × 3 m
+  wall_height_m: 0.5           # 낮은 벽 4면 (바닥 가장자리)
+  background:
+    kinds: [noise, voronoi, wave]   # Blender 절차적 텍스처 + 무작위 두 색 (외부 텍스처 미사용)
+    scale: [2.0, 30.0]
+  lights:
+    ceiling_plane: {z_m: 2.5, size_m: 1.5, strength: [2.0, 7.0]}
+    point: {n: 1, energy_w: [50.0, 400.0], radius_m: [0.8, 2.0], z_m: [0.8, 2.0]}
+    world_strength: [0.05, 0.4]
+
+camera:
+  K: [[572.4114, 0.0, 325.2611], [0.0, 573.57043, 242.04899], [0.0, 0.0, 1.0]]   # LM-O camera.json
+  width: 640
+  height: 480
+  pixel_center_convention: "datasets.py와 같이 픽셀 (u, v)의 중심 = K 좌표 (u+0.5, v+0.5). BlenderProc은 OpenCV 규약(중심 = 정수)이므로 cx−0.5, cy−0.5를 넘긴다"
+  distance_m: [0.6, 1.5]       # 관심점까지 거리
+  elevation_deg: [15.0, 80.0]  # 상반구
+  inplane_rot_rad: [-0.4, 0.4]
+  poi_jitter_m: 0.08           # 관심점 = 등장 대상 물체 중심 평균 + 균등 흔들림
+  views_per_scene: 20
+
+render:
+  device: CUDA                 # GTX 1060 6GB, Cycles
+  max_samples: 64
+  noise_threshold: 0.05
+  denoiser: INTEL              # OIDN
+  depth_antialiasing: false
+  rgb_format: jpg
+  jpg_quality: 95
+  depth_scale: 0.1             # BOP depth png 값 × 0.1 = mm
+  max_depth_m: 10.0            # 이보다 먼 값(하늘)은 0
+
+seeds:                         # 장면 시드 = base + offset + 장면 번호. train/val/pilot 시드 구간은 겹치지 않는다
+  base: 20261030
+  train_offset: 0              # train_synth 장면 i: base + i          (i < 100000)
+  val_offset: 100000           # val_synth 장면 i:   base + 100000 + i
+  pilot_offset: 900000         # pilot 장면 i:       base + 900000 + i (학습·검증 미사용)
+
+scale:
+  target: {train_images: 5000, val_images: 500}      # 장면 250 + 25 (장면당 20장)
+  fallback: {train_images: 2000, val_images: 200}    # 장면 100 + 10
+  # 사전 등록 규칙 (PLAN_v4 §10, 구현계획 §5): 파일럿 1장면 × 20장으로 장당 시간 t(s)를 잰다
+  # (프로세스 시작·모델 로드 포함 전체 벽시계 ÷ 20). t × 5,500 > 8 h(28,800 s)이면 fallback, 아니면 target.
+  # 결정은 scale_decision 아래에 파일럿 직후 기록한다. dev 결과를 보고 늘리지 않는다.
+  pilot: {scenes: 1, images: 20}
+  budget_s: 28800
+  scale_decision:              # 파일럿 직후 기록 (2026-10-30, results/v4/synth-gen_pilot)
+    choice: target
+    pilot_sec_per_image: 2.858  # 벽시계 57.2 s / 20장 (Blender 시작·모델 로드 포함, Cycles CUDA+OptiX 장치, GTX 1060)
+    projected_s: 15721          # 2.858 × 5,500 = 4.37 h ≤ budget 8 h → target (5,000 + 500)
+    pilot_mask_check: "results/v4/synth-check_pilot: mask_visib vs 정답 자세 레이캐스팅 IoU 평균 0.9999 (100 인스턴스)"
+
+output:
+  root: data/v4/synth
+  raw_dir: raw                 # Blender가 쓰는 장면별 npz (finalize 후 삭제)
+  bop_dir: bop                 # BOP 형식: bop/{train_synth,val_synth,pilot}/{scene:06d}/...
+  keep_raw: false
+  yolo:
+    root: data/v4/yolo
+    min_visib_fract: 0.1
+    min_px: 64
+
+change_log: []

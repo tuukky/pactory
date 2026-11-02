@@ -1,0 +1,95 @@
+# v4.1 설정 (색 순위 + 신뢰도 강화). 상속 없이 완결 파일. 파이프라인 키는 lmo_baseline.yaml과 같다 (테스트 01이 검사).
+# color.*, checks.* 값은 dev 조정(docs/v4/tuning_log.md §2)으로 정했다. 2026-10-31 동결 (frozen: true, configs/v4/frozen_manifest.json).
+schema_version: 1
+frozen: true
+units:
+  length: m
+seed: 0
+roi:
+  z_min_m: 0.2
+  z_max_m: 2.0
+preprocess:
+  voxel_m: 0.004
+  outlier_nb: 20
+  outlier_std: 2.0
+  normal_radius_m: 0.012
+  normal_max_nn: 30
+plane:
+  enabled: true
+  distance_m: 0.015
+  ransac_n: 3
+  iterations: 1000
+  min_inlier_frac: 0.1
+cluster:
+  eps_m: 0.01
+  min_points: 10
+  min_cluster_points: 30
+  min_extent_frac: 0.25
+  max_extent_frac: 1.6
+  max_candidates: 20
+model:
+  n_points: 6000
+fpfh:
+  radius_factor: 5.0
+  max_nn: 100
+ransac:
+  distance_factor: 1.5
+  ransac_n: 3
+  edge_length: 0.9
+  max_iteration: 100000
+  confidence: 0.999
+  mutual_filter: false
+  n_restarts: 5
+  min_points: 30
+icp:
+  coarse_max_corr_m: 0.015
+  coarse_max_iter: 30
+  fine_max_corr_m: 0.006
+  fine_max_iter: 50
+confidence:
+  min_fitness: 0.6
+  max_rmse_m: 0.004
+  min_visible_ratio: 0.5
+  vis_tol_m: 0.01
+symmetry:
+  max_sym_disc_step: 0.01
+profile: lmo
+version: v41
+source:
+  from: configs/v4/lmo_baseline.yaml (파이프라인 키 동일) + v4.1 키 (color, checks, seg, runtime)
+color:
+  enabled: true
+  models_dir: models
+  model_samples: 20000
+  similarity: bhattacharyya   # color-rank-diag 선택 (tuning_log §2.1, grid_idx 12)
+  top_k: 8                    # k_min = 8 (recall@8/recall@20 = 0.967); replay-tune 선택 8 (tuning_log §2.3)
+  min_px: 30
+  hist:
+    h_bins: 12
+    s_bins: 1
+    s_min: 45
+    achrom_v_bins: 3
+    h_smooth_sigma: 0.0
+checks:
+  enabled: true
+  depth:
+    tol_match_m: 0.01
+    tol_free_m: 0.015           # replay-tune 선택
+    max_violation: 0.1          # replay-tune 선택
+    min_valid_px: 50
+  color_match:
+    s_min_model: 40
+    s_min_obs: 30
+    achrom_s_max_obs: 90
+    h_tol: 15
+    min_match: 0.6              # replay-tune 선택 (격자 상한값)
+    min_px: 50
+  visibility_relax:
+    enabled: true
+    min_vis_relaxed: 0.3        # replay-tune 선택
+    min_match_px: 50            # replay-tune 선택
+seg:
+  source: dbscan
+runtime:
+  omp_num_threads: 16
+  cv2_threads: 1

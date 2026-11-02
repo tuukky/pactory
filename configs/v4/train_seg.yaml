@@ -1,0 +1,35 @@
+# v4.2-B 인스턴스 세그멘테이션 학습 설정 (PLAN_v4 §5.2, 구현계획 §5). **학습 전에 고정 (2026-10-30), 이후 고치지 않는다.**
+# 학습 데이터 = 합성(train_synth)만. 모델 선택(조기 종료·best.pt)은 합성 검증(val_synth)으로만 한다.
+# LM-O dev는 학습이 끝난 모델의 최종 점검(마스크 IoU·검출률, v4.2 dev 실행)에만 쓴다. eval은 eval-final 안에서만 예측한다.
+schema_version: 1
+label: "합성 데이터로 학습 (BlenderProc). 실측 LM-O 영상 미사용"
+env: pactory-seg              # torch 2.8.0+cu126, ultralytics 8.3.253 (AGPL-3.0: 코드·사전학습 가중치·학습 가중치)
+model: data/v4/weights/yolo11n-seg.pt   # COCO 사전학습 (sha256 55ed65c56c91713d23e8402371c6c49a6fd84f257f7dce452e8d70e41dcbe152)
+# 모델 크기: yolo11n-seg만 학습한다 (사전 결정). yolo11s-seg(batch 8, 약 6 h)는 시간 때문에 학습하지 않는다 — n 결과를 보고
+# s를 추가로 학습하는 갈림길을 만들지 않기 위해 학습 전에 정했다.
+data: data/v4/yolo/data.yaml
+classes: {0: 1, 1: 5, 2: 6, 3: 8, 4: 9, 5: 10, 6: 11, 7: 12}   # YOLO 클래스 → LM-O obj_id (ape, can, cat, driller, duck, eggbox, glue, holepuncher)
+train:
+  imgsz: 640
+  batch: 16
+  epochs: 100
+  patience: 20                # 조기 종료: val_synth fitness (ultralytics 기본: 0.1·mAP50 + 0.9·mAP50-95, box+mask)
+  workers: 4
+  amp: false                  # GTX 1060 (Pascal, fp16 텐서코어 없음) + AMP 검사 다운로드 회피
+  fliplr: 0.0                 # 좌우 반전 금지 (거울상 물체는 실재하지 않음)
+  seed: 0
+  deterministic: true
+  device: 0
+  cache: false
+  plots: true
+  # 나머지(옵티마이저, lr, mosaic, hsv 증강 등)는 ultralytics 8.3.253 기본값
+export:                       # 합성 BOP → YOLO-seg 변환
+  min_visib_fract: 0.1
+  min_px: 64
+  approx_eps_px: 1.0
+  min_piece_area_px: 16
+fusion_threshold_rule: >-
+  융합 conf = 합성 val_synth의 클래스 평균 Mask F1 곡선이 최대인 conf를 0.05 단위로 반올림 (dev로 정하지 않음).
+  NMS iou 0.7 (ultralytics 기본), imgsz 640, retina_masks (원본 해상도 마스크). 예측 파일에는 conf ≥ predict_conf_floor(0.05)를 모두 저장하고
+  융합 단계에서 conf로 거른다.
+predict_conf_floor: 0.05

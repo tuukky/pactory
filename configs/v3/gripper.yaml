@@ -1,0 +1,52 @@
+# 그리퍼·파지·작업영역·캘리브레이션·오차 예산 설정. 모든 값은 합성 가정이다 (평가 전에 고정).
+schema_version: 1
+source: "합성 가정 (실제 그리퍼·로봇 사양 아님)"
+units: {length: m, angle: deg}
+# 변환 표기: position_m + rpy_deg (scipy Rotation.from_euler("xyz", 외재 x→y→z, degrees))
+gripper:
+  approach_axis_tcp: [0.0, 0.0, 1.0]   # TCP +z = 접근 방향 (그리퍼가 물체로 들어가는 방향)
+  max_tilt_deg: 30.0                   # 접근축과 base 연직 아래(-z)의 최대 각
+  tolerance:                           # 파지 성공 판정 (PLAN_v3 §6.2, 합성 가정)
+    pos_m: 0.002
+    axis_deg: 3.0
+  grasps:                              # T_obj_grasp (하우징 물체 좌표, 합성 CAD)
+    - name: top_flange                 # 플랜지 윗면 중심, -z_obj 방향으로 접근 (똑바로 놓인 하우징)
+      position_m: [0.0, 0.0, 0.080]
+      rpy_deg: [180.0, 0.0, 0.0]
+    - name: bottom_face                # 다리 쪽 바닥면 중심, +z_obj 방향으로 접근 (뒤집힌 하우징)
+      position_m: [0.0, 0.0, 0.0]
+      rpy_deg: [0.0, 0.0, 0.0]
+workspace:                             # base 좌표 TCP 위치 허용 범위 (빈 위)
+  x_m: [0.28, 0.92]
+  y_m: [-0.32, 0.32]
+  z_m: [-0.01, 0.50]
+calibration:
+  board: {cols: 9, rows: 6, square_m: 0.025}   # 내부 코너 9x6, 칸 25 mm
+  # 보드를 TCP에 고정 (eye-to-hand). 보드 +z = TCP +z (아래) → 보드 앞면이 위쪽 카메라를 본다. 정답값.
+  T_tcp_board: {position_m: [-0.1, -0.0625, 0.03], rpy_deg: [0.0, 0.0, 5.0]}
+  board_pose_sampling:                 # 카메라 기준 보드 자세 표본 (전체 코너가 영상 안)
+    distance_m: [0.45, 0.75]
+    max_tilt_deg: 35.0
+    max_roll_deg: 20.0
+    center_frac: 0.6                   # 보드 중심 투영이 영상 중앙 이 비율 안
+  handeye:
+    methods: [TSAI, PARK, HORAUD, ANDREFF, DANIILIDIS]
+    # T_cam_board 측정 노이즈 (축별 σ, 오른쪽 섭동). 로봇 자세는 정확하다고 가정.
+    noise_levels:
+      - {rot_deg: 0.0, trans_m: 0.0}
+      - {rot_deg: 0.02, trans_m: 0.0001}
+      - {rot_deg: 0.05, trans_m: 0.00025}
+      - {rot_deg: 0.1, trans_m: 0.0005}
+    pose_counts: [5, 10, 15, 20, 30]
+    n_trials: 50
+    seed: 0
+    end_to_end: {n_poses: 15, pixel_noise: 2.0}   # 체커보드 렌더링 + solvePnP 경로 (밝기 노이즈 σ, 0~255)
+error_budget:
+  success_target: 0.95                 # 허용치 안 비율 기준 (사전 기재)
+  n_samples: 4000
+  # 자세 추정 오차 (축별 σ, 물체 원점 기준 오른쪽 섭동). 합성 가정 — synth-demo 경험값으로 대체 가능.
+  pose_sigma: {rot_deg: 0.3, trans_m: 0.0005}
+  # Hand-eye σ를 가져올 곡선 조건 (noise_levels 인덱스, 로봇 자세 수, 방법)
+  handeye_reference: {noise_level: 2, n_poses: 15, method: PARK}
+  handeye_rot_grid_deg: [0.0, 0.005, 0.01, 0.015, 0.02, 0.025, 0.03, 0.04, 0.05, 0.06, 0.08, 0.1, 0.15, 0.2]
+  object: {position_m: [0.6, 0.0, 0.0], rpy_deg: [0.0, 0.0, 0.0], grasp: 0}   # 빈 중심, 똑바로

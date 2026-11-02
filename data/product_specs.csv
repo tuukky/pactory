@@ -1,0 +1,4 @@
+﻿product_type,order_count,order_share,prep_s,asm_s,test_s,rework_s,pack_s,fail_rate,recover_prob
+P1,240,0.5,30,70,50,90,20,0.02,0.85
+P2,144,0.3,35,85,65,120,25,0.04,0.85
+P3,96,0.2,40,110,90,150,30,0.06,0.85

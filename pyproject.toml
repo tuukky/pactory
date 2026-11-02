@@ -1,0 +1,27 @@
+[build-system]
+requires = ["setuptools>=61"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "line-sim"
+version = "0.1.0"
+description = "3품종 공유설비 생산라인 이산사건 시뮬레이션 (합성 가정 기반)"
+requires-python = ">=3.11"
+dependencies = [
+    "simpy==4.1.2",
+    "numpy==2.1.3",
+    "pandas==2.2.3",
+    "scipy==1.15.3",
+    "PyYAML==6.0.2",
+]
+
+[project.optional-dependencies]
+dashboard = ["streamlit==1.45.1", "plotly==5.24.1"]
+dev = ["pytest==8.3.4"]
+
+[tool.setuptools.packages.find]
+where = ["src"]
+
+[tool.pytest.ini_options]
+pythonpath = ["src"]
+testpaths = ["tests"]

@@ -1,0 +1,176 @@
+# 모터 공장 v2 — Rev.A 초기 설계 (PLAN_v2 §3·§4).
+# 모든 수치는 합성 가정이며 실측값이 아니다. 시간 단위: 초. 가동시간 기준 연속 시간(교대 경계 없음).
+# 고장·준비·품질 같은 현상 파라미터는 §8 보정(시드 1~9)으로 동결했다(준비시간만 변경, calibration.md). 설비 대수·인원·버퍼·K 같은
+# 설계 변수는 보정하지 않는다.
+schema_version: 2
+model_name: motor_factory_v2
+revision: A
+includes:
+  layout: layout.yaml
+  operators.skills: skills.yaml
+
+run:
+  warmup_s: 288000          # 1주 = 80 가동시간 (§9.1, MSER-5 확인 완료 → 80h 유지, calibration.md)
+  observation_s: 576000     # 2주 = 160 가동시간
+
+stochastic:
+  enabled: true             # false = 표의 고정시간(검증 모드)
+  cv: 0.15                  # 처리시간 로그정규 CV (준비·오븐은 고정)
+
+products:
+  groups:                   # 품종군: 비율, EOL 최초 불합격률, 재작업 후 재검사 합격률
+    A: {share: 0.5, fail_rate: 0.03, recover_prob: 0.85}
+    B: {share: 0.3, fail_rate: 0.05, recover_prob: 0.85}
+    C: {share: 0.2, fail_rate: 0.08, recover_prob: 0.85}
+  sku_factors: [0.90, 0.9667, 1.0333, 1.10]   # 군별 SKU 1~4 처리시간 계수 (평균 1, D10)
+
+demand:
+  mode: poisson             # poisson | explicit
+  rate_per_h: 18.0          # 가동시간당 평균 도착 (주 1,440대)
+  due_offset_s: 115200      # 납기 = 도착 + 2일(32 가동시간)
+  explicit: null
+
+release:
+  kit_slots: 30             # 키트 슬롯 K = 공장 전체 CONWIP 상한 (설계 변수)
+  slot_release_at: FA_START # FA가 키트를 가져갈 때 슬롯 해제
+
+housing:
+  enabled: true
+  reorder_point: 300        # s (재고위치 기준, D21)
+  order_qty: 600            # Q
+  lead_time_s: 115200       # 2일
+  initial_on_hand: 900
+
+routing:
+  parts:
+    ROTOR:   {from: RM, path: [R1, R2, R3, R4], to: KIT}
+    STATOR:  {from: RM, path: [S1, S2, S3, S4, S5], to: KIT}
+    HOUSING: {from: HW, path: [], to: KIT}
+  assembly: FA
+  inspect: {station: EOL, rework: RW, max_rework: 1, pass_to: PK}
+  ship_to: DOCK
+
+dispatch:
+  t_max_s: 3600             # FAMILY 규칙 굶주림 방지 (D11)
+
+targets:                    # 설계 목표 (§4, D5~D7)
+  demand_fulfil_ratio_min: 0.98   # 관측창 양품 출하 / 관측창 도착
+  otd_min: 0.95                   # 납기가 관측창에 속한 주문의 납기 내 양품 출하 비율
+  lead_time_mean_max_s: 57600     # 도착→출하 평균 16h
+
+stations:
+  R1:
+    machines: 3
+    times_s: {A: 170, B: 200, C: 240}
+    setup_group_change_s: 37.5    # 보정 동결 (초기 300 × 0.125, docs/v2/calibration.md)
+    operator: setup_only
+    dispatch: FIFO
+    failure_class: cnc_winder
+    input_buffer: {capacity: 6}
+  R2:
+    machines: 1
+    times_s: {A: 55, B: 60, C: 70}
+    operator: full
+    failure_class: other
+    input_buffer: {capacity: 6}
+  R3:
+    machines: 1
+    times_s: {A: 50, B: 55, C: 65}
+    operator: full
+    failure_class: other
+    input_buffer: {capacity: 6}
+  R4:
+    machines: 1
+    times_s: {A: 55, B: 60, C: 70}
+    operator: none
+    failure_class: other
+    input_buffer: {capacity: 6}
+    output_buffer: {capacity: 8}
+  S1:
+    machines: 1
+    times_s: {A: 55, B: 62, C: 72}
+    operator: full
+    failure_class: other
+    input_buffer: {capacity: 6}
+  S2:
+    machines: 1
+    times_s: {A: 50, B: 55, C: 60}
+    operator: none
+    failure_class: other
+    input_buffer: {capacity: 6}
+  S3:
+    machines: 3
+    times_s: {A: 160, B: 190, C: 230}
+    setup_group_change_s: 30      # 보정 동결 (초기 240 × 0.125, docs/v2/calibration.md)
+    operator: setup_only
+    dispatch: FIFO
+    failure_class: cnc_winder
+    input_buffer: {capacity: 6}
+  S4:
+    machines: 2
+    times_s: {A: 100, B: 115, C: 135}
+    operator: full
+    failure_class: other
+    input_buffer: {capacity: 6}
+  S5:
+    kind: batch_oven
+    machines: 1
+    batch: {max_size: 24, process_s: 1800, max_wait_s: 900}
+    operator: none
+    failure_class: oven
+    input_buffer: {capacity: 6}
+    output_buffer: {capacity: 8}
+  FA:
+    machines: 3
+    times_s: {A: 150, B: 170, C: 200}
+    operator: full
+    dispatch: FIFO
+    failure_class: other
+    output_buffer: {capacity: 8}
+  EOL:
+    machines: 2
+    times_s: {A: 90, B: 100, C: 115}
+    operator: none
+    failure_class: other
+    input_buffer: {capacity: 8, reserved_recheck: 2}   # 재검사 전용 예약 2 (§3.2)
+    output_buffer: {capacity: 8}
+  RW:
+    machines: 1
+    times_s: {A: 300, B: 360, C: 450}
+    operator: full
+    failure_class: other
+    input_buffer: {capacity: null}   # 불량 대기 랙, 무제한 (D2: 재검사 교착 방지)
+    output_buffer: {capacity: 8}
+  PK:
+    machines: 1
+    times_s: {A: 45, B: 50, C: 55}
+    operator: full
+    failure_class: other
+    input_buffer: {capacity: 6}      # D14
+    output_buffer: {capacity: 8}
+
+failures:
+  enabled: true
+  distribution: stochastic   # stochastic(간격 지수, 수리 로그정규) | fixed(검증용 고정값)
+  mtbf_scale: 1.0            # 강건성 '노후 설비' = 0.5
+  classes:                   # 가공시간 기준 평균 고장 간격, 수리시간 평균(대응 지연 포함)과 CV
+    cnc_winder: {mtbf_proc_s: 14400, mttr_s: 2100, repair_cv: 0.5}
+    oven:       {mtbf_proc_s: 43200, mttr_s: 3600, repair_cv: 0.4}
+    other:      {mtbf_proc_s: 28800, mttr_s: 1200, repair_cv: 0.5}
+
+operators:
+  mode: pool                 # pool | unlimited(검증용)
+  walk_speed_mps: 1.2
+
+agv:
+  mode: fleet                # fleet | instant(검증용, 운반 0초)
+  count: 3
+  speed_mps: 1.0
+  load_s: 20                 # 정차 1회당
+  unload_s: 20
+  capacity: 4
+  home_node: CHG
+  charge: {after_busy_s: 14400, duration_s: 1800, node: CHG}
+
+# 스테이션별 가공시간 배율(준비시간 제외). 예: {R1: 0.9}
+time_scale: {}

@@ -1,0 +1,54 @@
+﻿parameter,value,unit,evidence_type,source_or_reason,limitation
+order_count_P1,240,ea,assumed,비교 실험용 합성 설정,실측값 아님
+order_count_P2,144,ea,assumed,비교 실험용 합성 설정,실측값 아님
+order_count_P3,96,ea,assumed,비교 실험용 합성 설정,실측값 아님
+order_total,480,ea,derived,품종별 주문 합,실제 수요 아님
+order_ready_at,0,s,design_choice,모든 주문이 시각 0에 준비된 유한 묶음,주문 도착 과정 미모델링
+due_time,28800,s,assumed,순가동 8시간 1교대,휴게·교대 교체 미모델링
+release_min_interval,48,s,assumed,비교 실험용 합성 설정,실측값 아님
+wip_limit,40,ea,assumed,비교 실험용 합성 설정,실측값 아님
+release_sequence_policy,random_permutation,-,design_choice,시드 기반 무작위 순열(품종별 주문 수 유지),실제 생산계획 규칙 아님
+buffer_capacity_Q_PREP,8,ea,assumed,비교 실험용 합성 설정 (대기 제품 수만 계산),실측값 아님
+buffer_capacity_Q_ASM,8,ea,assumed,비교 실험용 합성 설정 (대기 제품 수만 계산),실측값 아님
+buffer_capacity_Q_TEST,8,ea,assumed,비교 실험용 합성 설정 (대기 제품 수만 계산),실측값 아님
+buffer_capacity_Q_REWORK,4,ea,assumed,비교 실험용 합성 설정 (대기 제품 수만 계산),실측값 아님
+buffer_capacity_Q_PACK,8,ea,assumed,비교 실험용 합성 설정 (대기 제품 수만 계산),실측값 아님
+machines_PREP,1,ea,assumed,비교 실험용 합성 설정,실측값 아님
+machines_ASM,2,ea,assumed,비교 실험용 합성 설정,실측값 아님
+machines_TEST,1,ea,assumed,비교 실험용 합성 설정,실측값 아님
+machines_REWORK,1,ea,assumed,비교 실험용 합성 설정,실측값 아님
+machines_PACK,1,ea,assumed,비교 실험용 합성 설정,실측값 아님
+prep_time_P1,30,s,assumed,비교 실험용 합성 설정,실측값 아님
+prep_time_P2,35,s,assumed,비교 실험용 합성 설정,실측값 아님
+prep_time_P3,40,s,assumed,비교 실험용 합성 설정,실측값 아님
+asm_time_P1,70,s,assumed,비교 실험용 합성 설정,실측값 아님
+asm_time_P2,85,s,assumed,비교 실험용 합성 설정,실측값 아님
+asm_time_P3,110,s,assumed,비교 실험용 합성 설정,실측값 아님
+test_time_P1,50,s,assumed,비교 실험용 합성 설정,실측값 아님
+test_time_P2,65,s,assumed,비교 실험용 합성 설정,실측값 아님
+test_time_P3,90,s,assumed,비교 실험용 합성 설정,실측값 아님
+rework_time_P1,90,s,assumed,비교 실험용 합성 설정 (재검사 포함),실측값 아님
+rework_time_P2,120,s,assumed,비교 실험용 합성 설정 (재검사 포함),실측값 아님
+rework_time_P3,150,s,assumed,비교 실험용 합성 설정 (재검사 포함),실측값 아님
+pack_time_P1,20,s,assumed,비교 실험용 합성 설정,실측값 아님
+pack_time_P2,25,s,assumed,비교 실험용 합성 설정,실측값 아님
+pack_time_P3,30,s,assumed,비교 실험용 합성 설정,실측값 아님
+fail_rate_P1,0.02,prob,assumed,비교 실험용 합성 설정,실측값 아님
+fail_rate_P2,0.04,prob,assumed,비교 실험용 합성 설정,실측값 아님
+fail_rate_P3,0.06,prob,assumed,비교 실험용 합성 설정,실측값 아님
+recover_prob_P1,0.85,prob,assumed,비교 실험용 합성 설정,실측값 아님
+recover_prob_P2,0.85,prob,assumed,비교 실험용 합성 설정,실측값 아님
+recover_prob_P3,0.85,prob,assumed,비교 실험용 합성 설정,실측값 아님
+asm_setup_P1_to_P2,20,s,assumed,"비교 실험용 합성 설정 (설비별 직전 품종 기억, 최초 0)",실측값 아님
+asm_setup_P1_to_P3,40,s,assumed,"비교 실험용 합성 설정 (설비별 직전 품종 기억, 최초 0)",실측값 아님
+asm_setup_P2_to_P1,20,s,assumed,"비교 실험용 합성 설정 (설비별 직전 품종 기억, 최초 0)",실측값 아님
+asm_setup_P2_to_P3,30,s,assumed,"비교 실험용 합성 설정 (설비별 직전 품종 기억, 최초 0)",실측값 아님
+asm_setup_P3_to_P1,40,s,assumed,"비교 실험용 합성 설정 (설비별 직전 품종 기억, 최초 0)",실측값 아님
+asm_setup_P3_to_P2,30,s,assumed,"비교 실험용 합성 설정 (설비별 직전 품종 기억, 최초 0)",실측값 아님
+processing_time_cv,0.1,ratio,assumed,비교 실험용 합성 설정,현장 분포 추정 결과 아님
+processing_time_distribution,lognormal,-,design_choice,음수 처리시간 방지,현장 분포 적합 결과 아님
+move_time,0,s,design_choice,버퍼·공정 간 논리적 흐름만 모델링,운반 자원·거리 미반영
+time_limit,57600,s,design_choice,16시간 내 미종결 시 incomplete_at_limit,제한 이후 동작 미관측
+discovery_seeds,100-119,seed,design_choice,탐색용 20회 반복,표본 수 충분성 보장 아님
+confirmation_seeds,1000-1029,seed,design_choice,독립 확인용 30회 반복,표본 수 충분성 보장 아님
+rework_independent_retest_equipment,true,-,design_choice,재작업 셀에 독립 재검사 장비가 있다고 가정,공유 재검사 대비 TEST 부하 과소평가 가능

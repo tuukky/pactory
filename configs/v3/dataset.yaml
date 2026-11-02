@@ -1,0 +1,43 @@
+# 데이터셋 설정. 첫 사용 전에 기록하고 바꾸지 않는다 (PLAN_v3 §4.1).
+# 합성 bin-picking 조건 절(synthetic:)은 4주차 BlenderProc 생성 전에 추가한다.
+schema_version: 1
+bop:
+  name: lmo
+  source: "BOP LM-O (Linemod-Occluded), HF bop-benchmark/lmo: lmo_base.zip, lmo_models.zip, lmo_test_bop19.zip"
+  # 라이선스 확인 (v4.0 정리, 2026-10-30): BOP 웹사이트 https://bop.felk.cvut.cz/datasets/ 조회 결과
+  #   LM-O: CC BY-SA 4.0, LM(LINEMOD, v4 합성 방해물 모델 lm_models.zip): CC BY 4.0. 받은 zip의 dataset_info.md에는 표기 없음.
+  #   공개 시 원 저작자(LINEMOD: Hinterstoisser et al., LM-O: Brachmann et al., BOP) 표기와 SA(동일조건) 고지.
+  license: "LM-O CC BY-SA 4.0 (https://bop.felk.cvut.cz/datasets/, 조회 2026-10-30); LM 모델 CC BY 4.0"
+  root: data/v3/bop/lmo
+  split_dir: test
+  targets_file: test_targets_bop19.json
+  models_dir: models_eval   # 평가 지표용 모델 (BOP 권장)
+  objects: [1, 5, 6, 8, 9, 10, 11, 12]
+  # 분할: test_targets_bop19의 (scene_id, im_id) 200장을 정렬 후 seed로 섞어 dev 50 (make_split), 나머지 미사용.
+  # eval: dev가 아니고 같은 scene의 모든 dev 프레임과 |im_id 차| > eval_gap_im 인 후보(91장) 중 seed로 50장 (make_gapped_eval).
+  # 변경 기록 (2026-10-30): 최초 eval은 make_split으로 뽑아 LM-O scene 2 연속 시퀀스에서 dev와 1~2 im_id 차이로
+  #   인접한 쌍이 있었다 (평가 누설). eval을 한 번도 평가·로드하지 않은 상태에서 위 규칙으로 재생성했다.
+  #   dev 목록은 임계값 조정에 이미 쓰였으므로 바꾸지 않았다. 재생성 후 dev-eval 최소 간격 = 6 im_id.
+  split_seed: 20261030
+  n_dev: 50
+  n_eval: 50
+  eval_gap_im: 5
+  # 주 결과는 전체 파이프라인(dbscan). gt_mask(정답 가시 마스크 = 정합 상한)는 보조 결과로만 보고한다.
+  primary_seg: dbscan
+  success_frac: 0.1          # ADD(-S) < 0.1 × 직경
+  max_sym_disc_step: 0.01
+  splits:
+    dev: [
+      [2, 36], [2, 47], [2, 61], [2, 64], [2, 89], [2, 115], [2, 119], [2, 136], [2, 203], [2, 219],
+      [2, 243], [2, 249], [2, 258], [2, 307], [2, 322], [2, 338], [2, 387], [2, 415], [2, 425], [2, 434],
+      [2, 438], [2, 442], [2, 476], [2, 480], [2, 491], [2, 503], [2, 521], [2, 529], [2, 543], [2, 575],
+      [2, 607], [2, 611], [2, 625], [2, 708], [2, 739], [2, 750], [2, 754], [2, 762], [2, 785], [2, 791],
+      [2, 803], [2, 856], [2, 867], [2, 969], [2, 982], [2, 1012], [2, 1103], [2, 1117], [2, 1123], [2, 1180],
+    ]
+    eval: [
+      [2, 8], [2, 17], [2, 72], [2, 102], [2, 107], [2, 126], [2, 153], [2, 166], [2, 178], [2, 266],
+      [2, 365], [2, 368], [2, 560], [2, 563], [2, 642], [2, 648], [2, 649], [2, 679], [2, 691], [2, 695],
+      [2, 768], [2, 770], [2, 773], [2, 775], [2, 809], [2, 819], [2, 840], [2, 844], [2, 850], [2, 877],
+      [2, 883], [2, 886], [2, 894], [2, 903], [2, 909], [2, 918], [2, 934], [2, 952], [2, 961], [2, 991],
+      [2, 1001], [2, 1038], [2, 1057], [2, 1061], [2, 1069], [2, 1071], [2, 1087], [2, 1148], [2, 1151], [2, 1169],
+    ]

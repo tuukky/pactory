@@ -1,0 +1,130 @@
+﻿parameter,value,unit,evidence_type,source_or_reason,limitation
+machines_R1,3,대,design_choice,Rev.A 초기 설계값 (설계 변수),설계 개정에서 변경 가능
+r1_time_A,170,s,assumed,합성 가정: 가상 모터 공정 평균 처리시간,실측 아님
+r1_time_B,200,s,assumed,합성 가정: 가상 모터 공정 평균 처리시간,실측 아님
+r1_time_C,240,s,assumed,합성 가정: 가상 모터 공정 평균 처리시간,실측 아님
+r1_setup_group_change_s,37.5,s,derived,§8 보정: 초기 합성값 300 × 공통 배율 0.125 (준비 비율 5~15% 범위 중앙),보정 범위 자체가 합성 가정
+operator_R1,setup_only,-,design_choice,작업자 필요 구간 (§3.3),단순화한 작업 범위
+buffer_in_R1,6,개,design_choice,입력 버퍼 크기 (설계 변수),-
+machines_R2,1,대,design_choice,Rev.A 초기 설계값 (설계 변수),설계 개정에서 변경 가능
+r2_time_A,55,s,assumed,합성 가정: 가상 모터 공정 평균 처리시간,실측 아님
+r2_time_B,60,s,assumed,합성 가정: 가상 모터 공정 평균 처리시간,실측 아님
+r2_time_C,70,s,assumed,합성 가정: 가상 모터 공정 평균 처리시간,실측 아님
+operator_R2,full,-,design_choice,작업자 필요 구간 (§3.3),단순화한 작업 범위
+buffer_in_R2,6,개,design_choice,입력 버퍼 크기 (설계 변수),-
+machines_R3,1,대,design_choice,Rev.A 초기 설계값 (설계 변수),설계 개정에서 변경 가능
+r3_time_A,50,s,assumed,합성 가정: 가상 모터 공정 평균 처리시간,실측 아님
+r3_time_B,55,s,assumed,합성 가정: 가상 모터 공정 평균 처리시간,실측 아님
+r3_time_C,65,s,assumed,합성 가정: 가상 모터 공정 평균 처리시간,실측 아님
+operator_R3,full,-,design_choice,작업자 필요 구간 (§3.3),단순화한 작업 범위
+buffer_in_R3,6,개,design_choice,입력 버퍼 크기 (설계 변수),-
+machines_R4,1,대,design_choice,Rev.A 초기 설계값 (설계 변수),설계 개정에서 변경 가능
+r4_time_A,55,s,assumed,합성 가정: 가상 모터 공정 평균 처리시간,실측 아님
+r4_time_B,60,s,assumed,합성 가정: 가상 모터 공정 평균 처리시간,실측 아님
+r4_time_C,70,s,assumed,합성 가정: 가상 모터 공정 평균 처리시간,실측 아님
+operator_R4,none,-,design_choice,작업자 필요 구간 (§3.3),단순화한 작업 범위
+buffer_in_R4,6,개,design_choice,입력 버퍼 크기 (설계 변수),-
+buffer_out_R4,8,개,design_choice,AGV 픽업 대기 버퍼 (설계 변수),-
+machines_S1,1,대,design_choice,Rev.A 초기 설계값 (설계 변수),설계 개정에서 변경 가능
+s1_time_A,55,s,assumed,합성 가정: 가상 모터 공정 평균 처리시간,실측 아님
+s1_time_B,62,s,assumed,합성 가정: 가상 모터 공정 평균 처리시간,실측 아님
+s1_time_C,72,s,assumed,합성 가정: 가상 모터 공정 평균 처리시간,실측 아님
+operator_S1,full,-,design_choice,작업자 필요 구간 (§3.3),단순화한 작업 범위
+buffer_in_S1,6,개,design_choice,입력 버퍼 크기 (설계 변수),-
+machines_S2,1,대,design_choice,Rev.A 초기 설계값 (설계 변수),설계 개정에서 변경 가능
+s2_time_A,50,s,assumed,합성 가정: 가상 모터 공정 평균 처리시간,실측 아님
+s2_time_B,55,s,assumed,합성 가정: 가상 모터 공정 평균 처리시간,실측 아님
+s2_time_C,60,s,assumed,합성 가정: 가상 모터 공정 평균 처리시간,실측 아님
+operator_S2,none,-,design_choice,작업자 필요 구간 (§3.3),단순화한 작업 범위
+buffer_in_S2,6,개,design_choice,입력 버퍼 크기 (설계 변수),-
+machines_S3,3,대,design_choice,Rev.A 초기 설계값 (설계 변수),설계 개정에서 변경 가능
+s3_time_A,160,s,assumed,합성 가정: 가상 모터 공정 평균 처리시간,실측 아님
+s3_time_B,190,s,assumed,합성 가정: 가상 모터 공정 평균 처리시간,실측 아님
+s3_time_C,230,s,assumed,합성 가정: 가상 모터 공정 평균 처리시간,실측 아님
+s3_setup_group_change_s,30,s,derived,§8 보정: 초기 합성값 240 × 공통 배율 0.125 (준비 비율 5~15% 범위 중앙),보정 범위 자체가 합성 가정
+operator_S3,setup_only,-,design_choice,작업자 필요 구간 (§3.3),단순화한 작업 범위
+buffer_in_S3,6,개,design_choice,입력 버퍼 크기 (설계 변수),-
+machines_S4,2,대,design_choice,Rev.A 초기 설계값 (설계 변수),설계 개정에서 변경 가능
+s4_time_A,100,s,assumed,합성 가정: 가상 모터 공정 평균 처리시간,실측 아님
+s4_time_B,115,s,assumed,합성 가정: 가상 모터 공정 평균 처리시간,실측 아님
+s4_time_C,135,s,assumed,합성 가정: 가상 모터 공정 평균 처리시간,실측 아님
+operator_S4,full,-,design_choice,작업자 필요 구간 (§3.3),단순화한 작업 범위
+buffer_in_S4,6,개,design_choice,입력 버퍼 크기 (설계 변수),-
+machines_S5,1,대,design_choice,Rev.A 초기 설계값 (설계 변수),설계 개정에서 변경 가능
+s5_batch_max_size,24,개,assumed,합성 가정: 오븐 챔버 용량,실제 설비 사양 아님
+s5_batch_process_s,1800,s,assumed,합성 가정: 경화 시간 고정,실제 공정 조건 아님
+s5_batch_max_wait_s,900,s,design_choice,부분 배치 시작 규칙 (형성 시작 = 빈 챔버에 첫 적재 시각 기준; model_spec C1),운영 규칙 가정
+operator_S5,none,-,design_choice,작업자 필요 구간 (§3.3),단순화한 작업 범위
+buffer_in_S5,6,개,design_choice,입력 버퍼 크기 (설계 변수),-
+buffer_out_S5,8,개,design_choice,AGV 픽업 대기 버퍼 (설계 변수),-
+machines_FA,3,대,design_choice,Rev.A 초기 설계값 (설계 변수),설계 개정에서 변경 가능
+fa_time_A,150,s,assumed,합성 가정: 가상 모터 공정 평균 처리시간,실측 아님
+fa_time_B,170,s,assumed,합성 가정: 가상 모터 공정 평균 처리시간,실측 아님
+fa_time_C,200,s,assumed,합성 가정: 가상 모터 공정 평균 처리시간,실측 아님
+operator_FA,full,-,design_choice,작업자 필요 구간 (§3.3),단순화한 작업 범위
+buffer_out_FA,8,개,design_choice,AGV 픽업 대기 버퍼 (설계 변수),-
+machines_EOL,2,대,design_choice,Rev.A 초기 설계값 (설계 변수),설계 개정에서 변경 가능
+eol_time_A,90,s,assumed,합성 가정: 가상 모터 공정 평균 처리시간,실측 아님
+eol_time_B,100,s,assumed,합성 가정: 가상 모터 공정 평균 처리시간,실측 아님
+eol_time_C,115,s,assumed,합성 가정: 가상 모터 공정 평균 처리시간,실측 아님
+operator_EOL,none,-,design_choice,작업자 필요 구간 (§3.3),단순화한 작업 범위
+buffer_in_EOL,8,개,design_choice,입력 버퍼 크기 (설계 변수),-
+buffer_in_EOL_reserved_recheck,2,개,design_choice,재검사 전용 예약 슬롯 (교착 방지),-
+buffer_out_EOL,8,개,design_choice,AGV 픽업 대기 버퍼 (설계 변수),-
+machines_RW,1,대,design_choice,Rev.A 초기 설계값 (설계 변수),설계 개정에서 변경 가능
+rw_time_A,300,s,assumed,합성 가정: 가상 모터 공정 평균 처리시간,실측 아님
+rw_time_B,360,s,assumed,합성 가정: 가상 모터 공정 평균 처리시간,실측 아님
+rw_time_C,450,s,assumed,합성 가정: 가상 모터 공정 평균 처리시간,실측 아님
+operator_RW,full,-,design_choice,작업자 필요 구간 (§3.3),단순화한 작업 범위
+buffer_in_RW,null,개,design_choice,입력 버퍼 크기 (설계 변수),-
+buffer_out_RW,8,개,design_choice,AGV 픽업 대기 버퍼 (설계 변수),-
+machines_PK,1,대,design_choice,Rev.A 초기 설계값 (설계 변수),설계 개정에서 변경 가능
+pk_time_A,45,s,assumed,합성 가정: 가상 모터 공정 평균 처리시간,실측 아님
+pk_time_B,50,s,assumed,합성 가정: 가상 모터 공정 평균 처리시간,실측 아님
+pk_time_C,55,s,assumed,합성 가정: 가상 모터 공정 평균 처리시간,실측 아님
+operator_PK,full,-,design_choice,작업자 필요 구간 (§3.3),단순화한 작업 범위
+buffer_in_PK,6,개,design_choice,입력 버퍼 크기 (설계 변수),-
+buffer_out_PK,8,개,design_choice,AGV 픽업 대기 버퍼 (설계 변수),-
+share_A,0.5,비율,assumed,합성 가정: 품종 비율,실제 수요 아님
+fail_rate_A,0.03,확률,assumed,합성 가정: EOL 최초 불합격률 (§8 보정 대상),실측 아님
+recover_prob_A,0.85,확률,assumed,합성 가정: 재작업 후 재검사 합격률,실측 아님
+share_B,0.3,비율,assumed,합성 가정: 품종 비율,실제 수요 아님
+fail_rate_B,0.05,확률,assumed,합성 가정: EOL 최초 불합격률 (§8 보정 대상),실측 아님
+recover_prob_B,0.85,확률,assumed,합성 가정: 재작업 후 재검사 합격률,실측 아님
+share_C,0.2,비율,assumed,합성 가정: 품종 비율,실제 수요 아님
+fail_rate_C,0.08,확률,assumed,합성 가정: EOL 최초 불합격률 (§8 보정 대상),실측 아님
+recover_prob_C,0.85,확률,assumed,합성 가정: 재작업 후 재검사 합격률,실측 아님
+sku_factor_1,0.9,배,assumed,합성 가정: SKU 처리시간 계수 (평균 1),-
+sku_factor_2,0.9667,배,assumed,합성 가정: SKU 처리시간 계수 (평균 1),-
+sku_factor_3,1.0333,배,assumed,합성 가정: SKU 처리시간 계수 (평균 1),-
+sku_factor_4,1.1,배,assumed,합성 가정: SKU 처리시간 계수 (평균 1),-
+processing_time_cv,0.15,-,assumed,합성 가정: 로그정규 CV,실측 분포 아님
+demand_rate_per_h,18.0,대/h,assumed,합성 가정: 포아송 도착,실제 수요 아님
+due_offset_s,115200,s,assumed,납기 = 도착 + 2일(32 가동시간),-
+kit_slots,30,개,design_choice,키트 슬롯 K = 공장 CONWIP (설계 변수),-
+housing_reorder_point,300,개,design_choice,"하우징 (s, Q) 재고 정책",공급사 제약 미반영
+housing_order_qty,600,개,design_choice,"하우징 (s, Q) 재고 정책",공급사 제약 미반영
+housing_lead_time_s,115200,s,assumed,"하우징 (s, Q) 재고 정책",공급사 제약 미반영
+housing_initial_on_hand,900,개,assumed,"하우징 (s, Q) 재고 정책",공급사 제약 미반영
+mtbf_proc_cnc_winder,14400,s,assumed,합성 가정: 가공시간 기준 평균 고장 간격 (§8 보정 대상),현장 MTBF 측정치 아님
+mttr_cnc_winder,2100,s,assumed,합성 가정: 수리시간 평균(대응 지연 포함),정비 인력 경합 미반영
+repair_cv_cnc_winder,0.5,-,assumed,합성 가정: 수리시간 CV,-
+mtbf_proc_oven,43200,s,assumed,합성 가정: 가공시간 기준 평균 고장 간격 (§8 보정 대상),현장 MTBF 측정치 아님
+mttr_oven,3600,s,assumed,합성 가정: 수리시간 평균(대응 지연 포함),정비 인력 경합 미반영
+repair_cv_oven,0.4,-,assumed,합성 가정: 수리시간 CV,-
+mtbf_proc_other,28800,s,assumed,합성 가정: 가공시간 기준 평균 고장 간격 (§8 보정 대상),현장 MTBF 측정치 아님
+mttr_other,1200,s,assumed,합성 가정: 수리시간 평균(대응 지연 포함),정비 인력 경합 미반영
+repair_cv_other,0.5,-,assumed,합성 가정: 수리시간 CV,-
+operators_count,8,명,design_choice,작업자 수 (설계 변수),교대 경계 무시
+walk_speed_mps,1.2,m/s,assumed,합성 가정: 도보 속도,-
+agv_count,3,대,design_choice,AGV 사양·대수,AGV 혼잡 무시
+agv_speed_mps,1.0,m/s,assumed,AGV 사양·대수,AGV 혼잡 무시
+agv_load_s,20,s,assumed,AGV 사양·대수,AGV 혼잡 무시
+agv_unload_s,20,s,assumed,AGV 사양·대수,AGV 혼잡 무시
+agv_capacity,4,개,design_choice,AGV 사양·대수,AGV 혼잡 무시
+agv_charge_after_busy_s,14400,s,assumed,가동 4h마다 충전,-
+agv_charge_duration_s,1800,s,assumed,충전 30분,-
+layout_detour_factor,1.2,배,assumed,맨해튼 거리 × 우회계수,"설명용 좌표, 도면 아님"
+dispatch_t_max_s,3600,s,design_choice,FAMILY 굶주림 방지,-
+warmup_s,288000,s,design_choice,워밍업 1주 (MSER-5 시드 1~9 d*=0h ≤ 80h → 유지),-
+observation_s,576000,s,design_choice,관측 2주,-

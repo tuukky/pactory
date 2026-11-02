@@ -1,0 +1,26 @@
+# 빈 위 고정 RGB-D 카메라 (eye-to-hand). 모든 값은 합성 가정이다.
+schema_version: 1
+source: "합성 가정, D435급 640x480 근사 (실측·제조사 사양값 아님)"
+units: {length: m, angle: deg}
+# 픽셀 규약: 픽셀 (u, v)는 연속 좌표 [u, u+1) x [v, v+1)를 덮고 중심은 (u+0.5, v+0.5).
+# OpenCV/BOP 규약(중심 = 정수 좌표)과는 cx, cy가 0.5 차이 난다 (geometry.CameraIntrinsics 참고).
+intrinsics:
+  width: 640
+  height: 480
+  fx: 615.0
+  fy: 615.0
+  cx: 320.0
+  cy: 240.0
+  # RGB 렌즈 왜곡 [k1, k2, p1, p2, k3] (OpenCV 순서). 체커보드 캘리브레이션 정답으로만 쓴다.
+  # Depth 영상은 정합(rectified)되어 왜곡이 없다고 가정한다.
+  dist: [0.03, -0.06, 0.0005, -0.0003, 0.0]
+extrinsics:
+  # T_base_cam: base(로봇) 좌표에서 카메라 위치·시선. 빈 바닥 중심 (0.6, 0, 0) 위 1.0 m에서 아래를 본다.
+  # look_at 규약: 카메라 +z = 시선, +y = 영상 아래, image_up = 영상 위쪽이 향하는 base 방향.
+  position_m: [0.6, 0.0, 1.0]
+  look_at_m: [0.6, 0.0, 0.0]
+  image_up: [1.0, 0.0, 0.0]
+bin:
+  # 빈 바닥 (base z = 0), 크기 x, y (합성 가정)
+  center_m: [0.6, 0.0, 0.0]
+  size_xy_m: [0.60, 0.40]

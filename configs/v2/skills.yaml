@@ -1,0 +1,10 @@
+# 작업자 8명 숙련 매트릭스 (합성 기준안, 설계 변수). home = 시작 위치 노드.
+# 작업자 필요 공정: R1·S3(준비만), R2·R3·S1·S4·FA·RW·PK(가공 전체).
+OP1: {home: R2_1, skills: [R2, R3, R1]}
+OP2: {home: R3_1, skills: [R3, R2]}
+OP3: {home: S1_1, skills: [S1, S4, S3]}
+OP4: {home: S4_1, skills: [S4, S1]}
+OP5: {home: S4_2, skills: [S4, S3]}
+OP6: {home: FA_1, skills: [FA, PK]}
+OP7: {home: FA_2, skills: [FA, RW]}
+OP8: {home: FA_3, skills: [FA, PK, RW]}

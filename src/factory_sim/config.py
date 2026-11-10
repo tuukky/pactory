@@ -18,7 +18,7 @@ from line_sim.config import ConfigError, config_hash, load_yaml  # noqa: F401 - 
 OPEN_PREFIXES = ("layout.nodes", "operators.skills", "time_scale")
 OPERATOR_MODES = ("none", "setup_only", "full")
 DISPATCH_RULES = ("FIFO", "EDD", "FAMILY")
-STATION_KINDS = ("machine", "batch_oven")
+STATION_KINDS = ("machine", "batch_oven", "vision_pick")   # vision_pick: PLAN_v5 S3 VP 셀
 SPECIAL_NODES = ("RM", "HW", "KIT", "DOCK", "CHG")
 PART_SOURCES = ("RM", "HW")
 PART_SINKS = ("KIT", "SHIP")
@@ -215,6 +215,18 @@ def validate(cfg: Mapping) -> list[str]:
             for key in ("process_s", "max_wait_s"):
                 if not _is_number(b.get(key)) or b.get(key) < 0:
                     errors.append(f"{sid}.batch.{key}: 0 이상")
+        elif kind == "vision_pick":
+            vp = st.get("vision_pick") or {}
+            if not vp.get("dist_file"):
+                errors.append(f"{sid}.vision_pick.dist_file 없음")
+            if not _is_int(vp.get("max_attempts")) or vp.get("max_attempts") < 1:
+                errors.append(f"{sid}.vision_pick.max_attempts: 1 이상의 정수")
+            for key in ("capture_s", "manual_s"):
+                if not _is_number(vp.get(key)) or vp.get(key) < 0:
+                    errors.append(f"{sid}.vision_pick.{key}: 0 이상")
+            afr = vp.get("attempt_fail_rate")
+            if afr is not None and (not _is_number(afr) or not 0 <= afr <= 1):
+                errors.append(f"{sid}.vision_pick.attempt_fail_rate: 0~1")
         else:
             times = st.get("times_s") or {}
             for g in grp:

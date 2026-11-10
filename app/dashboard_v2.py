@@ -708,10 +708,14 @@ def tab_design() -> None:
 # ----------------------------------------------------------------------------- main
 st.warning(BANNER)
 st.title("모터 공장 v2 공정설계")
-t1, t2, t3 = st.tabs(["모델·실행", "한 실행의 진단", "설계 개정 비교"])
+t1, t2, t3, t4 = st.tabs(["모델·실행", "한 실행의 진단", "설계 개정 비교", "v5 통합 (비전→파지→라인)"])
 with t1:
     tab_model()
 with t2:
     tab_run()
 with t3:
     tab_design()
+with t4:
+    sys.path.insert(0, str(Path(__file__).resolve().parent))
+    from v5_tab import tab_v5
+    tab_v5()

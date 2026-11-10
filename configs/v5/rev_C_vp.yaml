@@ -1,0 +1,461 @@
+# PLAN_v5 S3 — Rev.C + 비전 피킹 셀 VP (HOUSING: HW → VP → KIT). configs/v2/rev_C.yaml에서 아래만 바꿨다.
+#  routing.parts.HOUSING.path [VP], stations.VP (kind vision_pick), layout.nodes VP_IN/VP_1/VP_OUT,
+#  VP 셀은 하우징 창고(HW) 옆: 창고 빈에서 바로 집는다(at_source, 입력 = 빈 → 용량 무제한, AGV 없음). VP→KIT는 AGV.
+#  operators OP6·OP8 skills += VP (수동 처리). VP 고장은 v2 "other" 등급(MTBF 8 h, MTTR 20 min, 합성).
+#  dist_file은 S1·S2 eval 결과로 만든 경험 분포 (개발 중에는 자리표시 분포 → 측정 분포로 바꾼 뒤 동결).
+schema_version: 2
+model_name: motor_factory_v2
+revision: C_VP
+run:
+  warmup_s: 288000
+  observation_s: 576000
+stochastic:
+  enabled: true
+  cv: 0.15
+products:
+  groups:
+    A:
+      share: 0.5
+      fail_rate: 0.03
+      recover_prob: 0.85
+    B:
+      share: 0.3
+      fail_rate: 0.05
+      recover_prob: 0.85
+    C:
+      share: 0.2
+      fail_rate: 0.08
+      recover_prob: 0.85
+  sku_factors:
+  - 0.9
+  - 0.9667
+  - 1.0333
+  - 1.1
+demand:
+  mode: poisson
+  rate_per_h: 18.0
+  due_offset_s: 115200
+  explicit: null
+release:
+  kit_slots: 45
+  slot_release_at: FA_START
+housing:
+  enabled: true
+  reorder_point: 800
+  order_qty: 600
+  lead_time_s: 115200
+  initial_on_hand: 900
+routing:
+  parts:
+    ROTOR:
+      from: RM
+      path:
+      - R1
+      - R2
+      - R3
+      - R4
+      to: KIT
+    STATOR:
+      from: RM
+      path:
+      - S1
+      - S2
+      - S3
+      - S4
+      - S5
+      to: KIT
+    HOUSING:
+      from: HW
+      path:
+      - VP
+      to: KIT
+  assembly: FA
+  inspect:
+    station: EOL
+    rework: RW
+    max_rework: 1
+    pass_to: PK
+  ship_to: DOCK
+dispatch:
+  t_max_s: 3600
+targets:
+  demand_fulfil_ratio_min: 0.98
+  otd_min: 0.95
+  lead_time_mean_max_s: 57600
+stations:
+  R1:
+    machines: 3
+    times_s:
+      A: 170
+      B: 200
+      C: 240
+    setup_group_change_s: 37.5
+    operator: setup_only
+    dispatch: FIFO
+    failure_class: cnc_winder
+    input_buffer:
+      capacity: 6
+  R2:
+    machines: 1
+    times_s:
+      A: 55
+      B: 60
+      C: 70
+    operator: full
+    failure_class: other
+    input_buffer:
+      capacity: 6
+  R3:
+    machines: 1
+    times_s:
+      A: 50
+      B: 55
+      C: 65
+    operator: full
+    failure_class: other
+    input_buffer:
+      capacity: 6
+  R4:
+    machines: 1
+    times_s:
+      A: 55
+      B: 60
+      C: 70
+    operator: none
+    failure_class: other
+    input_buffer:
+      capacity: 6
+    output_buffer:
+      capacity: 8
+  S1:
+    machines: 1
+    times_s:
+      A: 55
+      B: 62
+      C: 72
+    operator: full
+    failure_class: other
+    input_buffer:
+      capacity: 6
+  S2:
+    machines: 1
+    times_s:
+      A: 50
+      B: 55
+      C: 60
+    operator: none
+    failure_class: other
+    input_buffer:
+      capacity: 6
+  S3:
+    machines: 3
+    times_s:
+      A: 160
+      B: 190
+      C: 230
+    setup_group_change_s: 30
+    operator: setup_only
+    dispatch: FIFO
+    failure_class: cnc_winder
+    input_buffer:
+      capacity: 6
+  S4:
+    machines: 2
+    times_s:
+      A: 100
+      B: 115
+      C: 135
+    operator: full
+    failure_class: other
+    input_buffer:
+      capacity: 6
+  S5:
+    kind: batch_oven
+    machines: 1
+    batch:
+      max_size: 24
+      process_s: 1800
+      max_wait_s: 900
+    operator: none
+    failure_class: oven
+    input_buffer:
+      capacity: 6
+    output_buffer:
+      capacity: 8
+  FA:
+    machines: 3
+    times_s:
+      A: 150
+      B: 170
+      C: 200
+    operator: full
+    dispatch: FIFO
+    failure_class: other
+    output_buffer:
+      capacity: 8
+  EOL:
+    machines: 2
+    times_s:
+      A: 90
+      B: 100
+      C: 115
+    operator: none
+    failure_class: other
+    input_buffer:
+      capacity: 8
+      reserved_recheck: 2
+    output_buffer:
+      capacity: 8
+  RW:
+    machines: 1
+    times_s:
+      A: 300
+      B: 360
+      C: 450
+    operator: full
+    failure_class: other
+    input_buffer:
+      capacity: null
+    output_buffer:
+      capacity: 8
+  PK:
+    machines: 1
+    times_s:
+      A: 45
+      B: 50
+      C: 55
+    operator: full
+    failure_class: other
+    input_buffer:
+      capacity: 6
+    output_buffer:
+      capacity: 8
+  VP:
+    kind: vision_pick
+    machines: 1
+    times_s:
+      A: 0
+      B: 0
+      C: 0
+    operator: none
+    failure_class: other
+    input_buffer:
+      capacity: null
+    output_buffer:
+      capacity: 8
+    vision_pick:
+      dist_file: configs/v5/vp_dist_dev_placeholder.json
+      capture_s: 0.3
+      max_attempts: 3
+      manual_s: 60.0
+      reject_extra_s: 5.0
+      attempt_fail_rate: null
+      at_source: true
+failures:
+  enabled: true
+  distribution: stochastic
+  mtbf_scale: 1.0
+  classes:
+    cnc_winder:
+      mtbf_proc_s: 14400
+      mttr_s: 2100
+      repair_cv: 0.5
+    oven:
+      mtbf_proc_s: 43200
+      mttr_s: 3600
+      repair_cv: 0.4
+    other:
+      mtbf_proc_s: 28800
+      mttr_s: 1200
+      repair_cv: 0.5
+operators:
+  mode: pool
+  walk_speed_mps: 1.2
+  skills:
+    OP1:
+      home: R2_1
+      skills:
+      - R2
+      - R3
+      - R1
+    OP2:
+      home: R3_1
+      skills:
+      - R3
+      - R2
+    OP3:
+      home: S1_1
+      skills:
+      - S1
+      - S4
+      - S3
+    OP4:
+      home: S4_1
+      skills:
+      - S4
+      - S1
+    OP5:
+      home: S4_2
+      skills:
+      - S4
+      - S3
+    OP6:
+      home: FA_1
+      skills:
+      - FA
+      - PK
+      - VP
+    OP7:
+      home: FA_2
+      skills:
+      - FA
+      - RW
+    OP8:
+      home: FA_3
+      skills:
+      - FA
+      - PK
+      - RW
+      - VP
+agv:
+  mode: fleet
+  count: 3
+  speed_mps: 1.0
+  load_s: 20
+  unload_s: 20
+  capacity: 4
+  home_node: CHG
+  charge:
+    after_busy_s: 14400
+    duration_s: 1800
+    node: CHG
+time_scale: {}
+layout:
+  detour_factor: 1.2
+  nodes:
+    RM:
+    - 0
+    - 10
+    HW:
+    - 0
+    - 40
+    KIT:
+    - 50
+    - 10
+    DOCK:
+    - 96
+    - 10
+    CHG:
+    - 50
+    - 30
+    R1_IN:
+    - 6
+    - 0
+    R1_1:
+    - 10
+    - -4
+    R1_2:
+    - 10
+    - 0
+    R1_3:
+    - 10
+    - 4
+    R2_1:
+    - 18
+    - 0
+    R3_1:
+    - 24
+    - 0
+    R4_1:
+    - 30
+    - 0
+    R4_OUT:
+    - 34
+    - 0
+    S1_IN:
+    - 6
+    - 20
+    S1_1:
+    - 10
+    - 20
+    S2_1:
+    - 16
+    - 20
+    S3_1:
+    - 22
+    - 16
+    S3_2:
+    - 22
+    - 20
+    S3_3:
+    - 22
+    - 24
+    S4_1:
+    - 30
+    - 18
+    S4_2:
+    - 30
+    - 22
+    S5_1:
+    - 38
+    - 20
+    S5_OUT:
+    - 44
+    - 20
+    FA_1:
+    - 56
+    - 6
+    FA_2:
+    - 56
+    - 10
+    FA_3:
+    - 56
+    - 14
+    FA_OUT:
+    - 60
+    - 10
+    EOL_IN:
+    - 66
+    - 10
+    EOL_1:
+    - 70
+    - 8
+    EOL_2:
+    - 70
+    - 12
+    EOL_OUT:
+    - 74
+    - 10
+    RW_IN:
+    - 70
+    - 26
+    RW_1:
+    - 74
+    - 26
+    RW_OUT:
+    - 78
+    - 26
+    PK_IN:
+    - 82
+    - 10
+    PK_1:
+    - 86
+    - 10
+    PK_OUT:
+    - 90
+    - 10
+    VP_IN:
+    - 0
+    - 40
+    VP_1:
+    - 0
+    - 40
+    VP_OUT:
+    - 0
+    - 40
+frozen_from:
+  base_rev: B
+  study: p2_rev1
+  candidate: K45
+  description: 키트 슬롯 K 30→45
+  experiment_id: p2_rev1_explore2_20261026T235927_a71a0e81

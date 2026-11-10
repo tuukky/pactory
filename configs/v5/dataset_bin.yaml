@@ -1,0 +1,109 @@
+# PLAN_v5 §4.1 하우징 bin 합성 데이터 조건. **첫 생성(파일럿 포함) 전에 기록, 이후 고치지 않는다.**
+# 작성 2026-11-09. 바꿔야 하면 change_log에 사유를 남기고, 이미 만든 데이터는 다시 만든다.
+# 모든 장면은 합성 (BlenderProc 렌더링, 합성 하우징 CAD). 실측 영상·실제 제품 도면이 아니다.
+schema_version: 1
+label: "합성: BlenderProc 렌더링 (합성 하우징 CAD, 빈 bin-picking)"
+frozen_before_generation: true
+
+tools:
+  blenderproc: "2.8.0"
+  blender_install_path: 'C:\stockauto\tools\blender'
+  blenderproc_exe: 'C:\Users\CEO\anaconda3\envs\pactory-seg\Scripts\blenderproc.exe'
+  scenes_per_process: 25
+
+housing:                       # cad.HousingSpec 기본값 (플랜지 지름 100 mm, 전체 높이 80 mm, 다리 3개)
+  spec: default
+  material:                    # 금속 (반사 → 결측 모사의 근거)
+    base_gray: [0.45, 0.75]
+    metallic: [0.7, 1.0]
+    roughness: [0.25, 0.55]
+
+bin:                           # base 좌표 (camera.yaml의 bin.center_m, size_xy_m와 같다)
+  center_m: [0.6, 0.0, 0.0]
+  inner_size_xy_m: [0.60, 0.40]
+  wall_height_m: 0.12
+  wall_thickness_m: 0.01
+  drop:                        # 빈 안 낙하 초기 위치 (빈 중심 기준, m)
+    xy_half_m: [0.22, 0.13]
+    z_range_m: [0.06, 0.45]
+  physics:
+    collision_shape: CONVEX_HULL   # 하우징 볼록껍질 (플랜지-다리 사이 오목부 무시 → 실제보다 덜 촘촘히 쌓임, 한계에 기록)
+    min_simulation_time: 1.5
+    max_simulation_time: 6.0
+    check_object_interval: 1.0
+
+camera:                        # configs/v3/camera.yaml (eye-to-hand 고정, base 좌표)
+  source: configs/v3/camera.yaml
+  train_jitter:                # 학습용 장면에만 (dev·eval은 고정 카메라 그대로)
+    position_m: 0.06
+    look_at_m: 0.05
+    views_per_scene: 10
+
+lighting:
+  base:                        # 천장 면광 + 약한 점광
+    ceiling: {z_m: 2.2, size_m: 1.2, strength: [3.0, 5.0]}
+    point: {energy_w: [30.0, 120.0], radius_m: [0.3, 1.0], z_m: [1.2, 2.0]}
+    world_strength: [0.2, 0.4]
+  side:                        # 강한 측면광 (낮은 고도)
+    ceiling: {z_m: 2.2, size_m: 1.2, strength: [0.5, 1.0]}
+    point: {energy_w: [600.0, 1200.0], radius_m: [0.7, 1.0], z_m: [0.15, 0.35]}
+    world_strength: [0.05, 0.15]
+
+render:
+  device: CUDA
+  max_samples: 64
+  noise_threshold: 0.05
+  denoiser: INTEL
+  depth_antialiasing: false
+  max_depth_m: 3.0
+
+# 평가 조건 (PLAN_v5 §4.1): 기준에서 한 변수씩. 노이즈·결측은 같은 렌더(적재 5, 기본 조명)에 호스트에서 후처리로 넣는다
+# → 노이즈·결측 조건끼리는 같은 장면의 짝 비교가 된다. 적재 수와 조명은 렌더가 다르다.
+conditions:
+  base:      {render: n05_base, noise_mm: 1.0, dropout: 0.05}
+  n01:       {render: n01_base, noise_mm: 1.0, dropout: 0.05}
+  n10:       {render: n10_base, noise_mm: 1.0, dropout: 0.05}
+  n20:       {render: n20_base, noise_mm: 1.0, dropout: 0.05}
+  noise0:    {render: n05_base, noise_mm: 0.0, dropout: 0.05}
+  noise2:    {render: n05_base, noise_mm: 2.0, dropout: 0.05}
+  noise4:    {render: n05_base, noise_mm: 4.0, dropout: 0.05}
+  drop00:    {render: n05_base, noise_mm: 1.0, dropout: 0.00}
+  drop15:    {render: n05_base, noise_mm: 1.0, dropout: 0.15}
+  drop30:    {render: n05_base, noise_mm: 1.0, dropout: 0.30}
+  side_light: {render: n05_side, noise_mm: 1.0, dropout: 0.05}
+
+renders:                       # 렌더 세트: 하우징 개수, 조명
+  n01_base: {n_housings: 1, lighting: base}
+  n05_base: {n_housings: 5, lighting: base}
+  n10_base: {n_housings: 10, lighting: base}
+  n20_base: {n_housings: 20, lighting: base}
+  n05_side: {n_housings: 5, lighting: side}
+
+depth_model:                   # 호스트 후처리 (합성 가정)
+  noise: "유효 픽셀에 N(0, σ²) z 방향 가산 (거리 무관, 카메라-빈 약 1 m로 범위가 좁음)"
+  dropout: >-
+    하우징 픽셀 중 비율 p를 0(결측)으로. 반사 모사: 저주파 잡음장(가우시안 블러 σ 6 px)의 상위 p 분위 픽셀을 고른다
+    (덩어리 모양 결측). 빈·바닥 픽셀은 결측 없음.
+  seed_rule: "후처리 난수 시드 = 장면 시드 × 100 + 조건 번호 (conditions 순서)"
+
+splits:
+  dev:   {scenes_per_render: 10, seed_base: 50000}
+  eval:  {scenes_per_render: 20, seed_base: 60000}
+  train: {scenes: 200, seed_base: 70000, n_housings: [1, 20], p_side_light: 0.3}
+  val:   {scenes: 20, seed_base: 80000, n_housings: [1, 20], p_side_light: 0.3}
+# 장면 시드 = seed_base + 렌더 세트 번호 × 1000 + 장면 번호 (dev·eval), seed_base + 장면 번호 (train·val).
+# 학습(train·val) 장면은 dev·eval과 시드 구간이 겹치지 않는다. 학습 장면은 카메라 흔들림(views_per_scene 10).
+
+pick_rule: >-
+  장면마다 로봇이 집을 하나 = 파이프라인 후보를 위쪽(카메라에 가까운)부터 시도해 처음 채택(OK)되고 파지 자세가
+  접근·작업영역 검사를 통과한 것. 정답 대응 = 추정 자세와 ADI가 가장 작은 하우징. 정답 TCP 오차가
+  configs/v3/gripper.yaml 허용치(±2 mm / ±3°) 안이면 올바른 채택, 밖이면 오채택.
+
+output:
+  root: data/v5/bin
+  raw_dir: raw
+
+change_log:
+  - date: 2026-11-09
+    change: "PLAN_v5 §4.1의 '평가 대상 = 최상단 하우징 1개'를 pick_rule(파이프라인이 처음 채택한 후보)로 바꾸고, 노이즈·결측을 같은 렌더의 후처리로 넣음"
+    reason: "로봇이 실제로 집는 결정을 평가하고, 노이즈·결측 조건을 짝 비교로 만들기 위해. 데이터 생성·평가 전에 바꿈"

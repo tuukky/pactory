@@ -17,6 +17,7 @@ docs/final_report.md
 # 데이터셋·합성 데이터·가중치 (download-bop / synth-gen으로 다시 만듦)
 data/v3/
 data/v4/
+data/v5/
 *.pt
 *.zip
 

@@ -145,6 +145,10 @@ class ReleaseController:
                     ctx.kit.deliver(job)
                 else:
                     ctx.buffers[target.station_id].request_put(job, None)
+            elif target.kind == "station" and (ctx.cfg["stations"][target.station_id].get("vision_pick") or {}).get(
+                    "at_source"):
+                # PLAN_v5 S3: 창고 옆 VP 셀 — 창고 빈에서 바로 집으므로 AGV 운반 없이 VP 입력(빈)으로
+                ctx.buffers[target.station_id].request_put(job, None)
             else:
                 ctx.src_out[g.source_node(p)].request_put(job, None, target, target.cls)
         self._indicators()

@@ -108,6 +108,8 @@ class _Context:
         self.inventory: HousingInventory | None = None
         self.release: ReleaseController | None = None
         self.groups_cfg = cfg["products"]["groups"]
+        self.vp_dists: dict[str, dict] = {}   # v5 VP 셀 (kind: vision_pick)만 사용
+        self.vp_stats: dict[str, dict] = {}
 
     # -- 처리시간 ------------------------------------------------------------------------
     def duration(self, job: PartJob, sid: str) -> float:
@@ -346,6 +348,9 @@ def _build(ctx: _Context) -> None:
             ctx.clocks[m.id] = clock
             if st.get("kind", "machine") == "batch_oven":
                 env.process(oven_process(ctx, m, st, ctx.buffers[sid], clock))
+            elif st.get("kind", "machine") == "vision_pick":   # PLAN_v5 S3 (v2 설정에는 없음)
+                from .vision_pick import vision_pick_process
+                env.process(vision_pick_process(ctx, m, st, ctx.buffers[sid], selector, clock))
             else:
                 env.process(_machine_process(ctx, m, st, ctx.buffers[sid], selector, clock))
 
@@ -469,6 +474,8 @@ def _collect(ctx: _Context, run_id: str, seed: int, cfg: dict, orders: list[Orde
         "arrived": rel.arrived, "released": rel.released, "backlog_end": len(rel.backlog),
         "shipped": ctx.shipped, "scrapped": ctx.scrapped,
     }
+    if ctx.vp_stats:   # v5 VP 셀이 있을 때만 (v2 결과 파일은 그대로)
+        stats["vision_pick"] = ctx.vp_stats
     res = RunResult(run_id=run_id, status=status, seed=int(seed), config=cfg, config_hash=config_hash(cfg),
                     orders=orders, resource_states=states, stats=stats, sim_end_s=float(sim_end))
     if full:

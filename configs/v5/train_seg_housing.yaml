@@ -1,0 +1,23 @@
+# PLAN_v5 §4.2 B1 하우징 전용 YOLO11n-seg 학습 설정. **학습 전에 고정 (2026-11-09), 이후 고치지 않는다.**
+# configs/v4/train_seg.yaml에서 바꾼 값만: data, epochs 100 → 40, patience 20 → 10 (클래스 1개·데이터 2,000장, 시간 예산)
+# 학습 데이터 = 합성(train 200장면 × 10뷰)만. 모델 선택은 합성 val(20장면 × 10뷰)로만. dev·eval 장면은 학습에 쓰지 않는다.
+schema_version: 1
+label: "합성 데이터(BlenderProc 하우징 bin)로 학습. 실측 영상 미사용"
+env: pactory-seg
+model: data/v4/weights/yolo11n-seg.pt      # COCO 사전학습 (v4와 같은 파일)
+data: data/v5/yolo/data.yaml
+classes: {0: housing}
+train:
+  imgsz: 640
+  batch: 16
+  epochs: 40
+  patience: 10
+  workers: 4
+  amp: false
+  fliplr: 0.0
+  seed: 0
+  deterministic: true
+  device: 0
+  cache: false
+  plots: true
+fusion_threshold_rule: "융합 conf = 합성 val Mask F1 최대 conf를 0.05 단위로 (dev로 정하지 않음)"

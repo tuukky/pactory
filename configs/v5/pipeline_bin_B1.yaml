@@ -1,0 +1,89 @@
+# PLAN_v5 S1 파이프라인 설정. dev에서만 조정하고, eval-final 전에 frozen: true로 동결한다. 바꾼 값은 docs/v5/verification.md에 기록.
+schema_version: 1
+frozen: true          # 2026-11-10 dev 조정(max_instances 5) 후 동결
+units:
+  length: m
+seed: 0
+roi:
+  z_min_m: 0.2
+  z_max_m: 2.0
+roi_bin:   # dev 조정 1 (2026-11-09): 빈 내부 ROI (PLAN_v3 파이프라인 2단계). 벽 윗부분이 위쪽 후보로 먼저 잡히던 문제
+  margin_m: 0.008
+  z_min_m: 0.003
+  z_max_m: 0.30
+preprocess:
+  voxel_m: 0.004
+  outlier_nb: 20
+  outlier_std: 2.0
+  normal_radius_m: 0.012
+  normal_max_nn: 30
+plane:
+  enabled: true
+  distance_m: 0.006
+  ransac_n: 3
+  iterations: 1000
+  min_inlier_frac: 0.15
+cluster:
+  eps_m: 0.01
+  min_points: 10
+  min_cluster_points: 30
+  min_extent_frac: 0.25
+  max_extent_frac: 1.6
+  max_candidates: 10
+model:
+  n_points: 6000
+fpfh:
+  radius_factor: 5.0
+  max_nn: 100
+ransac:
+  distance_factor: 1.5
+  ransac_n: 3
+  edge_length: 0.9
+  max_iteration: 100000
+  confidence: 0.999
+  mutual_filter: false
+  n_restarts: 5
+  min_points: 30
+icp:
+  coarse_max_corr_m: 0.015
+  coarse_max_iter: 30
+  fine_max_corr_m: 0.006
+  fine_max_iter: 50
+confidence:
+  min_fitness: 0.6
+  max_rmse_m: 0.004
+  min_visible_ratio: 0.5
+  vis_tol_m: 0.01
+symmetry:
+  max_sym_disc_step: 0.01
+version: v5-B1
+source:
+  from: B0 파이프라인 값 + configs/v4/lmo_v42.yaml checks (색 일치 검사는 하우징 메시에 정점 색이 없어 자동으로
+    건너뜀)
+  note: YOLO11n-seg 하우징 전용 재학습 마스크 → 마스크 점군 정합 → v4.1 깊이 일관성 검사. 위쪽 마스크부터 시도
+checks:
+  enabled: true
+  depth:
+    tol_match_m: 0.01
+    tol_free_m: 0.015
+    max_violation: 0.1
+    min_valid_px: 50
+  color_match:
+    s_min_model: 40
+    s_min_obs: 30
+    achrom_s_max_obs: 90
+    h_tol: 15
+    min_match: 0.6
+    min_px: 50
+  visibility_relax:
+    enabled: true
+    min_vis_relaxed: 0.3
+    min_match_px: 50
+seg:
+  source: yolo
+  weights: results/v5/s1_bin/seg-train/weights/best.pt
+  weights_sha256: f60d5d816c5a245ce26dad11fe6f83ca9350181d598d6b5427a0a6ec0c9c8457
+  conf: 0.6                 # val Mask F1 최대 0.592 → 0.05 단위 (results/v5/s1_bin/seg-train/val_synth.json)
+  erode_px: 0
+  max_instances: 5
+  conf_rule: val 세트(합성) Mask F1 최대 conf를 0.05 단위로 (dev로 정하지 않음)

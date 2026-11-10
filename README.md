@@ -4,6 +4,7 @@
 
 - **공정설계 (v1–v2)**: SimPy 이산사건 시뮬레이션으로 병목을 진단하고, 초기 설계(Rev.A)를 개정해 수요와 납기를 맞추는 공정 구성을 찾는다.
 - **비전 가이드 피킹 (v3–v4)**: RGB-D로 물체의 6D 자세를 추정해 로봇 파지 위치를 계산하고, 공개 데이터셋(BOP LM-O)에서 실패 원인을 분석해 개선한다.
+- **통합 (v5)**: 빈에 쌓인 하우징을 인식(비전) → MuJoCo 로봇 팔이 접촉으로 집기(파지) → 측정한 실패율·시간을 공장 라인에 투입. 세 단계를 파일 계약으로 이었다.
 
 공장 모델의 입력값(작업시간·불량률·고장 등)은 모두 합성 가정이다. 비전 평가는 실측 공개 데이터셋 LM-O를 썼고, 학습 데이터는 BlenderProc 합성 렌더링이다. 한계는 각 단계의 `limitations.md`에 정리했다.
 
@@ -36,6 +37,20 @@ LM-O eval 50장, 세 버전을 동결한 뒤 1회 평가.
 
 - 성공률 향상은 통계적으로 명확하지 않았다. 효과는 틀린 결과를 덜 내보내는 쪽(오채택 감소)과 속도에서 나왔다.
 - 상세: [docs/v4/tuning_log.md](docs/v4/tuning_log.md), [docs/v4/verification.md](docs/v4/verification.md)
+
+### v5 통합 — 비전 → 로봇 파지 → 공장 라인
+
+합성 하우징 bin(BlenderProc) → MuJoCo 접촉 파지(자세 오차 이식) → Rev.C + 비전 피킹(VP) 셀. 단계마다 설정을 동결하고 eval 1회.
+
+| 단계 | 결과 |
+|---|---|
+| S1 비전 (11조건 × 20장면) | 하우징 전용 YOLO(B1)가 올바른 집기 31 → **129**건 (DBSCAN 기준선 대비, 짝 비교 p < 1e-20). 단 깊이 노이즈 σ 4 mm에서 B1 오채택 16/16 |
+| S2 파지 (MuJoCo) | 채택된 추정 자세 **22/22** 성공 = 정답 자세와 동일. 정답 + 4 mm/4° 잡음도 39/39. 오채택 중 허용치 근처 오차는 16/16 성공, **위아래 뒤집힘은 0/7** |
+| S3 라인 (시드 30개) | 측정 조건 수요 충족률 **0.995** — Rev.C와 차이 없음. 23.8대/h에서 1회 실패율 80 %일 때 처음 목표 미달(0.965). 원인은 VP가 아니라 수동 처리로 인한 작업자 부족 |
+
+- 합성 허용치 ±2 mm는 실제 접촉 파지에 비해 보수적이었다. 비싼 오류는 mm 오차가 아니라 뒤집힘 오인식이었다.
+- 사전 가설 10개 중 4개(V1, V2, G3, H3)는 지지되지 않았고, 그대로 기록했다.
+- 상세: [docs/v5/final_report.md](docs/v5/final_report.md), [docs/v5/verification.md](docs/v5/verification.md), [docs/v5/limitations.md](docs/v5/limitations.md)
 
 ## 개발 방식
 
@@ -118,6 +133,18 @@ python -m vision_guide.run_v4 eval-final --confirm-eval-once    # 1회만 실행
 - Open3D RANSAC 결과는 스레드 수에 따라 달라진다. `run_v4`는 open3d를 import하기 전에 `OMP_NUM_THREADS`를 정하고(기본 16), 실제 값을 metadata.json에 기록한다.
 - eval 분할은 `eval-final` 안에서만 읽는다.
 
+### v5 — 비전 → 파지 → 라인 통합
+
+```powershell
+python -m vision_guide.bin_v5 render --split dev|eval|train|val          # BlenderProc 하우징 bin (pactory-seg env)
+python -m vision_guide.seg_bin_v5 train | val | predict --split eval     # B1 학습·예측 (WSL2 또는 CUDA env)
+python -m vision_guide.bin_v5 eval-final --pipeline B0,B1 --preds results/v5/s1_bin/seg-predict_eval
+python tools/v5/s1_judge.py results/v5/s1_bin/eval-final_<ts>
+# S2: mujo 저장소 (WSL2) — python tools/run_housing_pick.py --records <S1 pick_records.jsonl> --split eval --lock
+python tools/v5/build_vp_dist.py --s1 <S1> --s2 <S2> --condition base --out configs/v5/vp_dist_measured.json
+python tools/v5/run_line_vp.py --phase confirm                            # 1회만 (잠금 파일)
+```
+
 ## 파일 형식
 
 - 시간 단위는 초. UI에서만 분·시간으로 바꾼다.
@@ -130,9 +157,10 @@ python -m vision_guide.run_v4 eval-final --confirm-eval-once    # 1회만 실행
 pactory/
 ├── src/
 │   ├── line_sim/       v1 이산사건 엔진
-│   ├── factory_sim/    v2 공장 엔진 (AGV, 작업자, 재고, 고장, 배차)
-│   └── vision_guide/   v3·v4 자세 추정, 캘리브레이션, 가이던스, 합성 데이터, 세그멘테이션
-├── configs/            v1 baseline·experiments, v2 Rev.A–C, v3 pipeline, v4 동결 설정
+│   ├── factory_sim/    v2 공장 엔진 (AGV, 작업자, 재고, 고장, 배차), v5 VP 셀
+│   └── vision_guide/   v3·v4 자세 추정, 캘리브레이션, 가이던스, 합성 데이터, 세그멘테이션, v5 하우징 bin
+├── configs/            v1 baseline·experiments, v2 Rev.A–C, v3 pipeline, v4·v5 동결 설정
+├── tools/v5/           v5 판정·분포 생성·라인 실험 스크립트
 ├── data/               합성 가정 CSV (데이터셋은 download-bop으로 받음)
 ├── app/                Streamlit 대시보드 (저장된 결과만 읽음)
 ├── tests/              v1–v4 검증 테스트

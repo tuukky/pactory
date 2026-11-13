@@ -89,7 +89,7 @@ def latest_experiment(prefix: str) -> Path | None:
 
 
 def no_results(msg: str) -> None:
-    st.info(f"{msg}\n\n결과가 없습니다. 먼저 실험을 실행하세요 (README의 'v2 모터 공장' 절 참고):\n\n"
+    st.info(f"{msg}\n\n결과가 없습니다. 먼저 실험을 실행하세요 (README의 '실행' 절 참고):\n\n"
             "`python -m factory_sim.run --config configs/v2/rev_C.yaml --seed 100 "
             "--output results/v2/representative/rev_C --detail full`")
 
@@ -702,7 +702,7 @@ def tab_design() -> None:
             continue
         st.markdown(f"**{title}** — `{exp.name}`")
         st.dataframe(targets_table(exp), use_container_width=True, hide_index=True)
-    st.caption("목표를 못 지키는 조건은 '설계 적용 범위 밖'으로 보고한다 (docs/v2/design_log.md).")
+    st.caption("목표를 못 지키는 조건은 '설계 적용 범위 밖'으로 보고한다 (docs/v2/final_report.md).")
 
 
 # ----------------------------------------------------------------------------- main
